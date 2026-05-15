@@ -7,7 +7,7 @@ from ehrql.tables.tpp import (
     medications, 
     ons_deaths,
     emergency_care_attendances,
-    ethnicity_from_sus,
+    ethnicity_from_sus
 )
 
 def ever_matching_event_clinical_ctv3_before(codelist, start_date, where=True):
@@ -231,3 +231,4 @@ def get_latest_ethnicity(
         )
 
         return ethnicity_combined
+

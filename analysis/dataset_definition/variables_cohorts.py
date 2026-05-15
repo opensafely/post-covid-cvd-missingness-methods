@@ -35,8 +35,16 @@ from variable_helper_functions import (
     last_matching_event_apc_before,
     matching_death_before,
     filter_codes_by_category,
-    get_latest_ethnicity,
+    get_latest_ethnicity
 )
+
+# Python library imports
+import math
+import json
+
+# Define the study_dates dictionary 
+with open("output/study_dates.json") as f:
+  study_dates = json.load(f)
 
 # Define generate variables function
 def generate_variables(index_date, end_date_exp, end_date_out):  
@@ -193,6 +201,11 @@ def generate_variables(index_date, end_date_exp, end_date_out):
 
     ### Sex
     cov_cat_sex = patients.sex
+
+    ## BMI
+    cov_num_bmi = last_matching_event_clinical_snomed_before(
+        bmi_primis, study_dates["ref_ar"]
+    ).numeric_value
 
     ### Ethnicity
     ### Grouping refers to the number of pre-defined categories (6 or 16) (White, Mixed, etc...)
@@ -534,6 +547,7 @@ def generate_variables(index_date, end_date_exp, end_date_out):
         ### Core covariates
         cov_num_age = cov_num_age,
         cov_cat_sex = cov_cat_sex,
+        cov_num_bmi = cov_num_bmi,
         cov_cat_ethnicity = cov_cat_ethnicity,
         cov_cat_imd = cov_cat_imd,
         cov_cat_smoking = cov_cat_smoking,

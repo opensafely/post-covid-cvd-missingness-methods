@@ -36,6 +36,7 @@ actions:
     run: ehrql:v1 generate-dataset analysis/dataset_definition/dataset_definition_prevax.py
       --output output/dataset_definition/input_prevax.csv.gz
     needs:
+    - study_dates
     - generate_dates
     outputs:
       highly_sensitive:
@@ -144,7 +145,7 @@ actions:
   ## Generate table1_cohort_prevax 
 
   table1-cohort_prevax:
-    run: 'r:v2 analysis/table1/table1.R prevax 18;30;40;50;50;70;80;90 '
+    run: 'r:v2 analysis/table1/table1.R prevax 18;30;40;50;60;70;80;90 '
     needs:
     - apply_across_MI_cohort_prevax
     outputs:
@@ -165,7 +166,7 @@ actions:
   ## Generate table1_cohort_prevax_subsample 
 
   table1-cohort_prevax_subsample:
-    run: 'r:v2 analysis/table1/table1_subsample.R prevax 18;30;40;50;50;70;80;90 '
+    run: 'r:v2 analysis/table1/table1_subsample.R prevax 18;30;40;50;60;70;80;90 '
     needs:
     - generate_subsample_cohort_prevax
     outputs:
@@ -177,7 +178,7 @@ actions:
 
   lasso_var_selection-cohort_prevax-main-ami:
     run: 'r:v2 analysis/lasso_var_selection/lasso_var_selection.R cohort_prevax-main-ami
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - generate_subsample_cohort_prevax
     - make_model_input_subsample-cohort_prevax-main-ami
@@ -189,7 +190,7 @@ actions:
 
   lasso_var_selection-cohort_prevax-main-stroke_sahhs:
     run: 'r:v2 analysis/lasso_var_selection/lasso_var_selection.R cohort_prevax-main-stroke_sahhs
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - generate_subsample_cohort_prevax
     - make_model_input_subsample-cohort_prevax-main-stroke_sahhs
@@ -201,7 +202,7 @@ actions:
 
   lasso_var_selection-cohort_prevax-sub_covidhospital_FALSE-ami:
     run: 'r:v2 analysis/lasso_var_selection/lasso_var_selection.R cohort_prevax-sub_covidhospital_FALSE-ami
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - generate_subsample_cohort_prevax
     - make_model_input_subsample-cohort_prevax-sub_covidhospital_FALSE-ami
@@ -215,7 +216,7 @@ actions:
 
   lasso_var_selection-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs:
     run: 'r:v2 analysis/lasso_var_selection/lasso_var_selection.R cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - generate_subsample_cohort_prevax
     - make_model_input_subsample-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
@@ -227,7 +228,7 @@ actions:
 
   lasso_var_selection-cohort_prevax-sub_covidhospital_TRUE-ami:
     run: 'r:v2 analysis/lasso_var_selection/lasso_var_selection.R cohort_prevax-sub_covidhospital_TRUE-ami
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - generate_subsample_cohort_prevax
     - make_model_input_subsample-cohort_prevax-sub_covidhospital_TRUE-ami
@@ -241,7 +242,7 @@ actions:
 
   lasso_var_selection-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs:
     run: 'r:v2 analysis/lasso_var_selection/lasso_var_selection.R cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - generate_subsample_cohort_prevax
     - make_model_input_subsample-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
@@ -253,7 +254,7 @@ actions:
 
   lasso_X_var_selection-cohort_prevax-main-ami:
     run: 'r:v2 analysis/lasso_X_var_selection/lasso_X_var_selection.R cohort_prevax-main-ami
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - generate_subsample_cohort_prevax
     - lasso_var_selection-cohort_prevax-main-ami
@@ -265,7 +266,7 @@ actions:
 
   lasso_X_var_selection-cohort_prevax-main-stroke_sahhs:
     run: 'r:v2 analysis/lasso_X_var_selection/lasso_X_var_selection.R cohort_prevax-main-stroke_sahhs
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - generate_subsample_cohort_prevax
     - lasso_var_selection-cohort_prevax-main-stroke_sahhs
@@ -279,7 +280,7 @@ actions:
 
   lasso_X_var_selection-cohort_prevax-sub_covidhospital_FALSE-ami:
     run: 'r:v2 analysis/lasso_X_var_selection/lasso_X_var_selection.R cohort_prevax-sub_covidhospital_FALSE-ami
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - generate_subsample_cohort_prevax
     - lasso_var_selection-cohort_prevax-sub_covidhospital_FALSE-ami
@@ -293,7 +294,7 @@ actions:
 
   lasso_X_var_selection-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs:
     run: 'r:v2 analysis/lasso_X_var_selection/lasso_X_var_selection.R cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - generate_subsample_cohort_prevax
     - lasso_var_selection-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
@@ -307,7 +308,7 @@ actions:
 
   lasso_X_var_selection-cohort_prevax-sub_covidhospital_TRUE-ami:
     run: 'r:v2 analysis/lasso_X_var_selection/lasso_X_var_selection.R cohort_prevax-sub_covidhospital_TRUE-ami
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - generate_subsample_cohort_prevax
     - lasso_var_selection-cohort_prevax-sub_covidhospital_TRUE-ami
@@ -321,7 +322,7 @@ actions:
 
   lasso_X_var_selection-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs:
     run: 'r:v2 analysis/lasso_X_var_selection/lasso_X_var_selection.R cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - generate_subsample_cohort_prevax
     - lasso_var_selection-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
@@ -333,7 +334,7 @@ actions:
 
   lasso_union_var_selection-cohort_prevax-main-ami:
     run: 'r:v2 analysis/lasso_union_var_selection/lasso_union_var_selection.R cohort_prevax-main-ami
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - lasso_var_selection-cohort_prevax-main-ami
     - lasso_X_var_selection-cohort_prevax-main-ami
@@ -345,7 +346,7 @@ actions:
 
   lasso_union_var_selection-cohort_prevax-main-stroke_sahhs:
     run: 'r:v2 analysis/lasso_union_var_selection/lasso_union_var_selection.R cohort_prevax-main-stroke_sahhs
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - lasso_var_selection-cohort_prevax-main-stroke_sahhs
     - lasso_X_var_selection-cohort_prevax-main-stroke_sahhs
@@ -359,7 +360,7 @@ actions:
 
   lasso_union_var_selection-cohort_prevax-sub_covidhospital_FALSE-ami:
     run: 'r:v2 analysis/lasso_union_var_selection/lasso_union_var_selection.R cohort_prevax-sub_covidhospital_FALSE-ami
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - lasso_var_selection-cohort_prevax-sub_covidhospital_FALSE-ami
     - lasso_X_var_selection-cohort_prevax-sub_covidhospital_FALSE-ami
@@ -373,7 +374,7 @@ actions:
 
   lasso_union_var_selection-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs:
     run: 'r:v2 analysis/lasso_union_var_selection/lasso_union_var_selection.R cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - lasso_var_selection-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
     - lasso_X_var_selection-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
@@ -387,7 +388,7 @@ actions:
 
   lasso_union_var_selection-cohort_prevax-sub_covidhospital_TRUE-ami:
     run: 'r:v2 analysis/lasso_union_var_selection/lasso_union_var_selection.R cohort_prevax-sub_covidhospital_TRUE-ami
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - lasso_var_selection-cohort_prevax-sub_covidhospital_TRUE-ami
     - lasso_X_var_selection-cohort_prevax-sub_covidhospital_TRUE-ami
@@ -401,7 +402,7 @@ actions:
 
   lasso_union_var_selection-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs:
     run: 'r:v2 analysis/lasso_union_var_selection/lasso_union_var_selection.R cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - lasso_var_selection-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
     - lasso_X_var_selection-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
@@ -1391,7 +1392,7 @@ actions:
 
   unconfoundedness_test-cohort_prevax-main-ami:
     run: 'r:v2 analysis/unconfoundedness_test/unconfoundedness_test.R cohort_prevax-main-ami
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - lasso_var_selection-cohort_prevax-main-ami
     - lasso_X_var_selection-cohort_prevax-main-ami
@@ -1408,7 +1409,7 @@ actions:
 
   unconfoundedness_test-cohort_prevax-main-stroke_sahhs:
     run: 'r:v2 analysis/unconfoundedness_test/unconfoundedness_test.R cohort_prevax-main-stroke_sahhs
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - lasso_var_selection-cohort_prevax-main-stroke_sahhs
     - lasso_X_var_selection-cohort_prevax-main-stroke_sahhs
@@ -1427,7 +1428,7 @@ actions:
 
   unconfoundedness_test-cohort_prevax-sub_covidhospital_FALSE-ami:
     run: 'r:v2 analysis/unconfoundedness_test/unconfoundedness_test.R cohort_prevax-sub_covidhospital_FALSE-ami
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - lasso_var_selection-cohort_prevax-sub_covidhospital_FALSE-ami
     - lasso_X_var_selection-cohort_prevax-sub_covidhospital_FALSE-ami
@@ -1446,7 +1447,7 @@ actions:
 
   unconfoundedness_test-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs:
     run: 'r:v2 analysis/unconfoundedness_test/unconfoundedness_test.R cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - lasso_var_selection-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
     - lasso_X_var_selection-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
@@ -1465,7 +1466,7 @@ actions:
 
   unconfoundedness_test-cohort_prevax-sub_covidhospital_TRUE-ami:
     run: 'r:v2 analysis/unconfoundedness_test/unconfoundedness_test.R cohort_prevax-sub_covidhospital_TRUE-ami
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - lasso_var_selection-cohort_prevax-sub_covidhospital_TRUE-ami
     - lasso_X_var_selection-cohort_prevax-sub_covidhospital_TRUE-ami
@@ -1484,7 +1485,7 @@ actions:
 
   unconfoundedness_test-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs:
     run: 'r:v2 analysis/unconfoundedness_test/unconfoundedness_test.R cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
-      prevax 18;30;40;50;50;70;80;90 '
+      prevax 18;30;40;50;60;70;80;90 '
     needs:
     - lasso_var_selection-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
     - lasso_X_var_selection-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
