@@ -27,6 +27,7 @@ library(mice)
 library(here)
 library(dplyr)
 library(fs)
+library(survival)
 
 
 # Define apply_across_MI output folder ---------------------------------------
@@ -75,6 +76,23 @@ df <- readr::read_rds(paste0(
 ))
 
 
+# Nelson-aalen function -------------------------------------------------------
+nelsonaalen <- function(data, timevar, statusvar, ...) {
+  time   <- data[, timevar, drop = TRUE]
+  status <- data[, statusvar, drop = TRUE]
+
+  coxph_obj <- survival::coxph(survival::Surv(time, status) ~ 1, ...)
+  hazard    <- survival::basehaz(coxph_obj)
+  
+  # Adjust depending on near-tie correction
+  idx <- if (coxph_obj$timefix) {
+    match(coxph_obj$y[, "time"], hazard[, "time"])
+  } else match(time, hazard[, "time"])
+
+  return (hazard[idx, "hazard"])
+}
+
+
 # Handle missingness ----------------------------------------------------------
 print("Applying multiple imputation to BMI and smoking covariates")
 
@@ -83,6 +101,9 @@ set.seed(2026)
 
 # convert all dates to numeric
 df <- (df %>% mutate_if(lubridate::is.Date, as.numeric))
+
+# censorship
+df$cens_status <- (!is.na(df$cens_date_dereg)) | (!is.na(df$cens_date_death))
 
 # define binary covid19 exposure status
 df$binary_covid19_exposure <- !is.na(df$exp_date_covid)
@@ -111,24 +132,51 @@ names(imp_method)             <- colnames(df_no_vax_dates)
 imp_method["cov_cat_smoking"] <- "polyreg" # smoking is categorical with 3 levels, Polytomous logistic regression
 imp_method["cov_num_bmi"]     <- "norm"    # bmi is numerical, Bayesian linear regression
 
-stop("here")
-
 # Specify imputation formulas
-my_formulas <- list(
-  cov_cat_smoking = paste0("cov_cat_smoking ~ ", ALLIMPUTATIONVARS, " + ", STATUSVARIABLEFOROUTCOME, " + H0"),
-  cov_num_bmi     = paste0("cov_num_bmi ~ ",     ALLIMPUTATIONVARS, " + ", STATUSVARIABLEFOROUTCOME, " + H0")
+all_var_names <- colnames(df_no_vax_dates)
+all_var_names <- all_var_names[! all_var_names %in% c(
+  "patient_id", "index_date", "end_date_exposure", "end_date_outcome",
+  "sub_bin_covidhistory", "sub_cat_covidhospital", "exp_date_covid",
+  "out_date_ami", "out_date_stroke_sahhs", "cov_cat_smoking", "cov_num_bmi"
+)]
+
+outcome_status_ami   <- "cov_bin_ami"
+outcome_status_sahhs <- "cov_bin_sahhs"
+
+my_formulas_ami <- list(
+  cov_cat_smoking = paste0("cov_cat_smoking ~ ", paste(all_var_names, collapse = " + "), " + ", outcome_status_ami),
+  cov_num_bmi     = paste0("cov_num_bmi ~ ",     paste(all_var_names, collapse = " + "), " + ", outcome_status_ami)
 )
 
-# Calculate Nelson-Aalen estimator
-# Analysis model is a cox regression as such this is needed
-df_no_vax_dates$H0 <- mice::nelsonaalen(
-  df_no_vax_dates,
-  timevar   = out_date_ami,           # time of outcome
-  statusvar = binary_covid19_exposure # status of exposure
+my_formulas_sahhs <- list(
+  cov_cat_smoking = paste0("cov_cat_smoking ~ ", paste(all_var_names, collapse = " + "), " + ", outcome_status_sahhs),
+  cov_num_bmi     = paste0("cov_num_bmi ~ ",     paste(all_var_names, collapse = " + "), " + ", outcome_status_sahhs)
 )
 
-print(df_no_vax_dates$H0)
-stop("check")
+print(my_formulas_ami)
+print(unname(my_formulas_ami))
+
+# # Calculate Nelson-Aalen estimator
+# # Analysis model is a cox regression as such this is needed
+# H0_ami <- nelsonaalen(
+#   df_no_vax_dates, "out_date_ami", "cens_status"
+# )
+
+# H0_sahhs <- nelsonaalen(
+#   df_no_vax_dates, "out_date_stroke_sahhs", "cens_status"
+# )
+
+# print(H0_ami)
+# print(length(H0_ami))
+# print(dim(H0_ami))
+
+# print(H0_sahhs)
+# print(length(H0_sahhs))
+# print(dim(H0_sahhs))
+
+# print(length(df_no_vax_dates$out_date_ami))
+
+# stop("check - incorrect column lengths, how to fix?")
 
 # Apply multiple imputation
 num_datasets <- 10
@@ -136,7 +184,7 @@ imp <- mice::mice(
   data       = df_no_vax_dates,
   m          = num_datasets,
   maxit      = 20,
-  formulas   = my_formulas,
+  formulas   = my_formulas_ami,
   imp_method = unname(imp_method)
 )
 
