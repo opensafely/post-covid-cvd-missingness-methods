@@ -130,21 +130,29 @@ imp_method["cov_num_bmi"]     <- "norm"    # bmi is numerical, Bayesian linear r
 print("Specify imputation formulas for each outcome (ami and sahhs)")
 
 # Specify imputation formulas, exclude variable such as index date
-all_var_names <- colnames(df_no_vax_dates)
-all_var_names <- all_var_names[! all_var_names %in% c(
-  "patient_id", "index_date", "end_date_exposure", "end_date_outcome",
-  "sub_bin_covidhistory", "sub_cat_covidhospital", "exp_date_covid",
-  "out_date_ami", "out_date_stroke_sahhs", "cov_cat_smoking", "cov_num_bmi"
-)]
+all_var_names <- c(
+  "cov_num_age", "cov_cat_sex", "cov_cat_ethnicity",
+  "cov_cat_imd", "cov_bin_carehome", "cov_bin_hcworker",
+  "cov_bin_dementia", "cov_bin_liver_disease", "cov_bin_ckd",
+  "cov_bin_cancer", "cov_bin_hypertension", "cov_bin_diabetes",
+  "cov_bin_obesity", "cov_bin_copd",
+  "cov_bin_depression", "cov_bin_stroke_all", "cov_bin_other_ae",
+  "cov_bin_vte", "cov_bin_hf", "cov_bin_angina",
+  "cov_bin_lipidmed", "cov_bin_antiplatelet", "cov_bin_anticoagulant",
+  "cov_bin_cocp", "cov_bin_hrt", "cens_date_dereg",
+  "strat_cat_region", "vax_cat_jcvi_group",
+  "cens_status", "cov_bin_covid19",
+  "cov_bin_sahhs", "cov_bin_ami"
+)
 
 my_formulas_ami <- list(
-  cov_cat_smoking = as.formula(paste0("cov_cat_smoking ~ ", paste(all_var_names, collapse = " + "), " + cov_bin_ami + H0_ami")),
-  cov_num_bmi     = as.formula(paste0("cov_num_bmi ~ ",     paste(all_var_names, collapse = " + "), " + cov_bin_ami + H0_ami"))
+  cov_cat_smoking = as.formula(paste0("cov_cat_smoking ~ ", paste(all_var_names, collapse = " + "), " + H0_ami")),
+  cov_num_bmi     = as.formula(paste0("cov_num_bmi ~ ",     paste(all_var_names, collapse = " + "), " + H0_ami"))
 )
 
 my_formulas_sahhs <- list(
-  cov_cat_smoking = as.formula(paste0("cov_cat_smoking ~ ", paste(all_var_names, collapse = " + "), " + cov_bin_sahhs + H0_sahhs")),
-  cov_num_bmi     = as.formula(paste0("cov_num_bmi ~ ",     paste(all_var_names, collapse = " + "), " + cov_bin_sahhs + H0_sahhs"))
+  cov_cat_smoking = as.formula(paste0("cov_cat_smoking ~ ", paste(all_var_names, collapse = " + "), " + H0_sahhs")),
+  cov_num_bmi     = as.formula(paste0("cov_num_bmi ~ ",     paste(all_var_names, collapse = " + "), " + H0_sahhs"))
 )
 
 
