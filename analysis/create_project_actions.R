@@ -197,7 +197,8 @@ apply_across_MI <- function(cohort) {
         glue("generate_input_{cohort}_clean")
       ),
       highly_sensitive = list(
-        cohort_clean_across_MI = glue("output/apply_across_MI/input_{cohort}_clean_across_MI.rds")
+        cohort_clean_across_MI_ami   = glue("output/apply_across_MI/input_{cohort}_clean_across_MI_ami.rds"),
+        cohort_clean_across_MI_sahhs = glue("output/apply_across_MI/input_{cohort}_clean_across_MI_sahhs.rds")
       )
     )
   )

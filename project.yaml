@@ -65,7 +65,8 @@ actions:
     - generate_input_prevax_clean
     outputs:
       highly_sensitive:
-        cohort_clean_across_MI: output/apply_across_MI/input_prevax_clean_across_MI.rds
+        cohort_clean_across_MI_ami: output/apply_across_MI/input_prevax_clean_across_MI_ami.rds
+        cohort_clean_across_MI_sahhs: output/apply_across_MI/input_prevax_clean_across_MI_sahhs.rds
 
   ## generate_subsample_cohort_prevax 
 
