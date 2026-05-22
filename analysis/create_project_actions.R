@@ -204,6 +204,27 @@ apply_across_MI <- function(cohort) {
   )
 }
 
+# Create function to repeat analysis under within multiple imputation to study data ---
+apply_within_MI <- function(cohort) {
+  splice(
+    comment(glue("apply_within_MI_cohort_{cohort}")),
+    action(
+      name = glue("apply_within_MI_cohort_{cohort}"),
+      run = glue(
+        "r:latest analysis/apply_within_MI/apply_within_MI.R"
+      ),
+      arguments = c(c(cohort)),
+      needs = list(
+        glue("generate_input_{cohort}_clean")
+      ),
+      highly_sensitive = list(
+        cohort_clean_within_MI_ami   = glue("output/apply_within_MI/input_{cohort}_clean_within_MI_ami.rds"),
+        cohort_clean_within_MI_sahhs = glue("output/apply_within_MI/input_{cohort}_clean_within_MI_sahhs.rds")
+      )
+    )
+  )
+}
+
 
 # Create function to generate 10% subsample of study population -----------------
 generate_subsample_cohort <- function(cohort) {
@@ -1074,11 +1095,20 @@ actions_list <- splice(
     )
   ),
 
-  # ## Apply across multiple imputation --------------------------------------
+  ## Apply across multiple imputation --------------------------------------
 
   splice(
     unlist(
       lapply(cohorts, function(x) apply_across_MI(cohort = x)),
+      recursive = FALSE
+    )
+  ),
+
+  ## Apply within multiple imputation --------------------------------------
+
+  splice(
+    unlist(
+      lapply(cohorts, function(x) apply_within_MI(cohort = x)),
       recursive = FALSE
     )
   ),

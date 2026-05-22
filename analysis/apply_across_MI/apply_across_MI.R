@@ -2,7 +2,9 @@
 #
 # apply_across_MI.R
 #
-# This file handles unpacking missingness and applying new methodology
+# This file applies multiple imputation to the BMI and Smoking covariates
+# MI is conducted in "across" fashion, meaning that the result is a dataframe
+# 10x larger than the origina containing all datasets
 # 
 # Arguments:
 #  - cohort - string, defines which of three opensafely cohorts to describe
