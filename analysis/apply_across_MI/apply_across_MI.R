@@ -55,16 +55,19 @@ print(length(args))
 if (length(args) == 0) {
   # default argument values
   cohort  <- "prevax"
+  name    <- "cohort_prevax-main-ami"
   preex   <- "All"
+
 } else {
   # YAML arguments
   cohort  <- args[[1]]
+  name    <- args[[2]]
 
   # optional argument
-  if (length(args) < 2) {
+  if (length(args) < 3) {
     preex <- "All"
   } else {
-    preex <- args[[2]]
+    preex <- args[[3]]
   } # allow an empty input for the preex variable
 }
 
@@ -129,7 +132,7 @@ imp_method["cov_num_bmi"]     <- "norm"    # bmi is numerical, Bayesian linear r
 
 
 # Specify imputation formulas for each outcome (ami and sahhs) -----------------
-print("Specify imputation formulas for each outcome (ami and sahhs)")
+print("Specify imputation formulas for outcome")
 
 # Specify imputation formulas, exclude variable such as index date
 all_var_names <- c(
@@ -147,125 +150,80 @@ all_var_names <- c(
   "cov_bin_sahhs", "cov_bin_ami"
 )
 
-my_formulas_ami <- list(
-  cov_cat_smoking = as.formula(paste0("cov_cat_smoking ~ ", paste(all_var_names, collapse = " + "), " + H0_ami")),
-  cov_num_bmi     = as.formula(paste0("cov_num_bmi ~ ",     paste(all_var_names, collapse = " + "), " + H0_ami"))
+my_formulas <- list(
+  cov_cat_smoking = as.formula(paste0("cov_cat_smoking ~ ", paste(all_var_names, collapse = " + "), " + H0")),
+  cov_num_bmi     = as.formula(paste0("cov_num_bmi ~ ",     paste(all_var_names, collapse = " + "), " + H0"))
 )
 
-my_formulas_sahhs <- list(
-  cov_cat_smoking = as.formula(paste0("cov_cat_smoking ~ ", paste(all_var_names, collapse = " + "), " + H0_sahhs")),
-  cov_num_bmi     = as.formula(paste0("cov_num_bmi ~ ",     paste(all_var_names, collapse = " + "), " + H0_sahhs"))
-)
+# Calculate Nelson-Aalen Estimator for outcome -----------
+print("Calculate Nelson-Aalen Estimator for outcome")
+
+if (grepl("ami", name, fixed = TRUE)) {
+  # ami
+  H0          <- (survfit(Surv(out_date_ami, cens_status) ~ 1, data = df_no_vax_dates) %>% summary(times = unique(df_no_vax_dates$out_date_ami)))
+  H0          <- H0[c("time", "surv")]
+  names(H0)   <- c("out_date_ami", "surv")
+  H0          <- as.data.frame(H0)
+  df_no_vax_dates <- merge(df_no_vax_dates, H0, all.x = TRUE, by = "out_date_ami")
+  df_no_vax_dates <- rename(df_no_vax_dates, H0 = surv)
+
+} else {
+  # stroke_sahhs
+  H0          <- (survfit(Surv(out_date_stroke_sahhs, cens_status) ~ 1, data = df_no_vax_dates) %>% summary(times = unique(df_no_vax_dates$out_date_stroke_sahhs)))
+  H0          <- H0[c("time", "surv")]
+  names(H0)   <- c("out_date_stroke_sahhs", "surv")
+  H0          <- as.data.frame(H0)
+  df_no_vax_dates <- merge(df_no_vax_dates, H0, all.x = TRUE, by = "out_date_stroke_sahhs")
+  df_no_vax_dates <- rename(df_no_vax_dates, H0 = surv)
+}
 
 
-# Calculate Nelson-Aalen Estimator for both outcomes (ami and sahhs) -----------
-print("Calculate Nelson-Aalen Estimator for both outcomes (ami and sahhs)")
-
-# ami
-H0_ami          <- (survfit(Surv(out_date_ami, cens_status) ~ 1, data = df_no_vax_dates) %>% summary(times = unique(df_no_vax_dates$out_date_ami)))
-H0_ami          <- H0_ami[c("time", "surv")]
-names(H0_ami)   <- c("out_date_ami", "surv")
-H0_ami          <- as.data.frame(H0_ami)
-df_no_vax_dates <- merge(df_no_vax_dates, H0_ami, all.x = TRUE, by = "out_date_ami")
-df_no_vax_dates <- rename(df_no_vax_dates, H0_ami = surv)
-
-# sahhs
-H0_stroke_sahhs        <- (survfit(Surv(out_date_stroke_sahhs, cens_status) ~ 1, data = df_no_vax_dates) %>% summary(times = unique(df_no_vax_dates$out_date_stroke_sahhs)))
-H0_stroke_sahhs        <- H0_stroke_sahhs[c("time", "surv")]
-names(H0_stroke_sahhs) <- c("out_date_stroke_sahhs", "surv")
-H0_stroke_sahhs        <- as.data.frame(H0_stroke_sahhs)
-df_no_vax_dates        <- merge(df_no_vax_dates, H0_stroke_sahhs, all.x = TRUE, by = "out_date_stroke_sahhs")
-df_no_vax_dates        <- rename(df_no_vax_dates, H0_sahhs = surv)
-
-
-# Applying multiple imputation to BMI and smoking covariates for ami outcome ---
-print("Applying multiple imputation to BMI and smoking covariates for ami outcome")
+# Applying multiple imputation to BMI and smoking covariates for outcome ---
+print("Applying multiple imputation to BMI and smoking covariates for outcome")
 
 # Apply multiple imputation
 num_datasets <- 10
-imp_ami <- mice::mice(
+imp <- mice::mice(
   data       = df_no_vax_dates,
   m          = num_datasets,
   maxit      = 20,
-  formulas   = my_formulas_ami,
+  formulas   = my_formulas,
   imp_method = unname(imp_method)
 )
 
-df_post_imputation_ami <- mice::complete(
-  imp_ami,
+df_post_imputation <- mice::complete(
+  imp,
   action  = "long",
   include = FALSE
 )
 
-df_post_imputation_ami <- subset(
-  df_post_imputation_ami,
+df_post_imputation <- subset(
+  df_post_imputation,
   select = -c(.imp, .id)
 )
 
-df_dates_stacked_ami <- rbind(
+df_dates_stacked <- rbind(
   df_dates, df_dates, df_dates, df_dates, df_dates,
   df_dates, df_dates, df_dates, df_dates, df_dates
 )
 
-df_post_imputation_ami <- cbind(
-  df_post_imputation_ami, df_dates_stacked_ami
+df_post_imputation <- cbind(
+  df_post_imputation, df_dates_stacked
 )
 
-
-# Applying multiple imputation to BMI and smoking covariates for sahhs outcome ---
-print("Applying multiple imputation to BMI and smoking covariates for sahhs outcome")
-
-# Apply multiple imputation
-num_datasets <- 10
-imp_sahhs <- mice::mice(
-  data       = df_no_vax_dates,
-  m          = num_datasets,
-  maxit      = 20,
-  formulas   = my_formulas_sahhs,
-  imp_method = unname(imp_method)
-)
-
-df_post_imputation_sahhs <- mice::complete(
-  imp_sahhs,
-  action  = "long",
-  include = FALSE
-)
-
-df_post_imputation_sahhs <- subset(
-  df_post_imputation_sahhs,
-  select = -c(.imp, .id)
-)
-
-df_dates_stacked_sahhs <- rbind(
-  df_dates, df_dates, df_dates, df_dates, df_dates,
-  df_dates, df_dates, df_dates, df_dates, df_dates
-)
-
-df_post_imputation_sahhs <- cbind(
-  df_post_imputation_sahhs, df_dates_stacked_sahhs
-)
-
-
-# Remove now unused level 'missing' from smoking covariate for both outcomes (ami and sahhs) ---
+# Remove now unused level 'missing' from smoking covariate ---
 print("Remove now unused level 'missing' from smoking covariate")
 
-df_post_imputation_ami$cov_cat_smoking <- factor(
-  df_post_imputation_ami$cov_cat_smoking,
-  levels = levels(droplevels(df_post_imputation_ami$cov_cat_smoking))
-)
-
-df_post_imputation_sahhs$cov_cat_smoking <- factor(
-  df_post_imputation_sahhs$cov_cat_smoking,
-  levels = levels(droplevels(df_post_imputation_sahhs$cov_cat_smoking))
+df_post_imputation$cov_cat_smoking <- factor(
+  df_post_imputation$cov_cat_smoking,
+  levels = levels(droplevels(df_post_imputation$cov_cat_smoking))
 )
 
 
-# Re-assign unique identifiers to imputed dataset for both outcomes (ami and sahhs)  ---
-print("Re-assign unique identifiers to imputed dataset for both outcomes (ami and sahhs) ")
+# Re-assign unique identifiers to imputed dataset for outcome  ---
+print("Re-assign unique identifiers to imputed dataset for outcome ")
 
-# NB: IDs are identical for both ami and sahhs, hence this is only calculated once
-
-patient_id_1 <- as.numeric(unique(df_post_imputation_ami$patient_id))
+patient_id_1 <- as.numeric(unique(df_post_imputation$patient_id))
 shift        <- max(patient_id_1) + 1
 
 patient_id_2  <- patient_id_1 + shift
@@ -283,21 +241,14 @@ new_patient_id <- c(
   patient_id_6, patient_id_7, patient_id_8, patient_id_9, patient_id_10
 )
 
-df_post_imputation_ami$patient_id   <- new_patient_id
-df_post_imputation_sahhs$patient_id <- new_patient_id
+df_post_imputation$patient_id   <- new_patient_id
 
 
-# Save data after 'across' multiple imputation for both outcomes (ami and sahhs)  ---
-print("Save data after 'across' multiple imputation for both outcomes (ami and sahhs) ")
-
-saveRDS(
-  df_post_imputation_ami,
-  file = paste0(apply_across_MI_dir, "input_", cohort, "_clean_across_MI_ami.rds"),
-  compress = TRUE
-)
+# Save data after 'across' multiple imputation  ---
+print("Save data after 'across' multiple imputation ")
 
 saveRDS(
-  df_post_imputation_sahhs,
-  file = paste0(apply_across_MI_dir, "input_", cohort, "_clean_across_MI_sahhs.rds"),
+  df_post_imputation,
+  file = paste0(apply_across_MI_dir, "input_", name, "_clean_across_MI.rds"),
   compress = TRUE
 )
