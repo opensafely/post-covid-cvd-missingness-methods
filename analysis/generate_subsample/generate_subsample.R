@@ -2,11 +2,12 @@
 #
 # generate_subsample.R
 #
-# This file generates a smaller cohort (10% of original sample size)
+# This file generates a smaller name (10% of original sample size)
 # for use when fitting computationally expensive models e.g. LASSO
 # 
 # Arguments:
-#  - cohort - string, defines which of three opensafely cohorts to describe
+#  - name - string, defines which of three opensafely names to describe
+#           and the corresponding outcome
 #             (prevax, vax, unvax)
 #  - preex - boolean/string, defines preexisting conditions
 #            for the replication preex = FALSE always
@@ -14,7 +15,7 @@
 #
 # Returns:
 #  - ...
-#    (output/generate_subsample/venn-cohort_{cohort}_subsample.rds)
+#    (output/generate_subsample/venn-name_{name}_subsample.rds)
 #
 # Authors: Emma Tarmey
 #
@@ -51,11 +52,11 @@ print(length(args))
 
 if (length(args) == 0) {
   # default argument values
-  cohort  <- "prevax"
+  name  <- "cohort_prevax-main-ami"
   preex   <- "All"
 } else {
   # YAML arguments
-  cohort  <- args[[1]]
+  name  <- args[[1]]
 
   # optional argument
   if (length(args) < 2) {
@@ -71,7 +72,7 @@ print("Load data")
 
 df <- readr::read_rds(paste0(
   "output/apply_across_MI/input_",
-  cohort,
+  name,
   "_clean_across_MI.rds"
 ))
 
@@ -101,7 +102,7 @@ print("Save subsample")
 
 saveRDS(
   subsample_df,
-  file = paste0(generate_subsample_dir, "input_", cohort, "_clean_across_MI_subsample.rds"),
+  file = paste0(generate_subsample_dir, "input_", name, "_clean_across_MI_subsample.rds"),
   compress = TRUE
 )
 

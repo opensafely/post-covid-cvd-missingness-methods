@@ -56,7 +56,7 @@ if (length(args) == 0) {
   # default argument values
   name    <- "cohort_prevax-main-ami"
   cohort  <- "prevax"
-  age_str <- "18;30;40;50;50;70;80;90"
+  age_str <- "18;30;40;50;60;70;80;90"
   preex   <- FALSE
 } else {
   # YAML arguments
@@ -79,7 +79,7 @@ print("Load subsample data")
 
 df <- readr::read_rds(paste0(
   "output/generate_subsample/input_",
-  cohort,
+  name,
   "_clean_across_MI_subsample.rds"
 ))
 

@@ -177,3 +177,512 @@ actions:
       highly_sensitive:
         clean_subsample_across_MI: output/generate_subsample/input_cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs_clean_across_MI_subsample.rds
 
+  ## Generate cox model input data for 10% subsample study population 
+  ## make_model_input_subsample-cohort_prevax-main-ami 
+
+  make_model_input_subsample-cohort_prevax-main-ami:
+    run: r:latest analysis/model/make_model_input_subsample.R cohort_prevax-main-ami
+    needs:
+    - generate_subsample_cohort_prevax-main-ami
+    outputs:
+      highly_sensitive:
+        model_input: output/model/model_input_subsample-cohort_prevax-main-ami.rds
+
+  ## make_model_input_subsample-cohort_prevax-main-stroke_sahhs 
+
+  make_model_input_subsample-cohort_prevax-main-stroke_sahhs:
+    run: r:latest analysis/model/make_model_input_subsample.R cohort_prevax-main-stroke_sahhs
+    needs:
+    - generate_subsample_cohort_prevax-main-stroke_sahhs
+    outputs:
+      highly_sensitive:
+        model_input: output/model/model_input_subsample-cohort_prevax-main-stroke_sahhs.rds
+
+  ## make_model_input_subsample-cohort_prevax-sub_covidhospital_FALSE-ami 
+
+  make_model_input_subsample-cohort_prevax-sub_covidhospital_FALSE-ami:
+    run: r:latest analysis/model/make_model_input_subsample.R cohort_prevax-sub_covidhospital_FALSE-ami
+    needs:
+    - generate_subsample_cohort_prevax-sub_covidhospital_FALSE-ami
+    outputs:
+      highly_sensitive:
+        model_input: output/model/model_input_subsample-cohort_prevax-sub_covidhospital_FALSE-ami.rds
+
+  ## make_model_input_subsample-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
+
+    
+
+  make_model_input_subsample-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs:
+    run: r:latest analysis/model/make_model_input_subsample.R cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
+    needs:
+    - generate_subsample_cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
+    outputs:
+      highly_sensitive:
+        model_input: output/model/model_input_subsample-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs.rds
+
+  ## make_model_input_subsample-cohort_prevax-sub_covidhospital_TRUE-ami 
+
+  make_model_input_subsample-cohort_prevax-sub_covidhospital_TRUE-ami:
+    run: r:latest analysis/model/make_model_input_subsample.R cohort_prevax-sub_covidhospital_TRUE-ami
+    needs:
+    - generate_subsample_cohort_prevax-sub_covidhospital_TRUE-ami
+    outputs:
+      highly_sensitive:
+        model_input: output/model/model_input_subsample-cohort_prevax-sub_covidhospital_TRUE-ami.rds
+
+  ## make_model_input_subsample-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
+
+    
+
+  make_model_input_subsample-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs:
+    run: r:latest analysis/model/make_model_input_subsample.R cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
+    needs:
+    - generate_subsample_cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
+    outputs:
+      highly_sensitive:
+        model_input: output/model/model_input_subsample-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs.rds
+
+  ## Generate table1_cohort_prevax-main-ami 
+
+  table1-cohort_prevax-main-ami:
+    run: 'r:v2 analysis/table1/table1.R cohort_prevax-main-ami 18;30;40;50;60;70;80;90 '
+    needs:
+    - apply_across_MI_cohort_prevax-main-ami
+    outputs:
+      moderately_sensitive:
+        table1: output/table1/table1-cohort_prevax-main-ami.csv
+        table1_midpoint6: output/table1/table1-cohort_prevax-main-ami-midpoint6.csv
+
+  ## Generate table1_cohort_prevax-main-stroke_sahhs 
+
+  table1-cohort_prevax-main-stroke_sahhs:
+    run: 'r:v2 analysis/table1/table1.R cohort_prevax-main-stroke_sahhs 18;30;40;50;60;70;80;90 '
+    needs:
+    - apply_across_MI_cohort_prevax-main-stroke_sahhs
+    outputs:
+      moderately_sensitive:
+        table1: output/table1/table1-cohort_prevax-main-stroke_sahhs.csv
+        table1_midpoint6: output/table1/table1-cohort_prevax-main-stroke_sahhs-midpoint6.csv
+
+  ## Generate table1_cohort_prevax-sub_covidhospital_FALSE-ami 
+
+  table1-cohort_prevax-sub_covidhospital_FALSE-ami:
+    run: 'r:v2 analysis/table1/table1.R cohort_prevax-sub_covidhospital_FALSE-ami
+      18;30;40;50;60;70;80;90 '
+    needs:
+    - apply_across_MI_cohort_prevax-sub_covidhospital_FALSE-ami
+    outputs:
+      moderately_sensitive:
+        table1: output/table1/table1-cohort_prevax-sub_covidhospital_FALSE-ami.csv
+        table1_midpoint6: output/table1/table1-cohort_prevax-sub_covidhospital_FALSE-ami-midpoint6.csv
+
+  ## Generate table1_cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs 
+
+  table1-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs:
+    run: 'r:v2 analysis/table1/table1.R cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
+      18;30;40;50;60;70;80;90 '
+    needs:
+    - apply_across_MI_cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
+    outputs:
+      moderately_sensitive:
+        table1: output/table1/table1-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs.csv
+        table1_midpoint6: output/table1/table1-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs-midpoint6.csv
+
+  ## Generate table1_cohort_prevax-sub_covidhospital_TRUE-ami 
+
+  table1-cohort_prevax-sub_covidhospital_TRUE-ami:
+    run: 'r:v2 analysis/table1/table1.R cohort_prevax-sub_covidhospital_TRUE-ami 18;30;40;50;60;70;80;90 '
+    needs:
+    - apply_across_MI_cohort_prevax-sub_covidhospital_TRUE-ami
+    outputs:
+      moderately_sensitive:
+        table1: output/table1/table1-cohort_prevax-sub_covidhospital_TRUE-ami.csv
+        table1_midpoint6: output/table1/table1-cohort_prevax-sub_covidhospital_TRUE-ami-midpoint6.csv
+
+  ## Generate table1_cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs 
+
+  table1-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs:
+    run: 'r:v2 analysis/table1/table1.R cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
+      18;30;40;50;60;70;80;90 '
+    needs:
+    - apply_across_MI_cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
+    outputs:
+      moderately_sensitive:
+        table1: output/table1/table1-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs.csv
+        table1_midpoint6: output/table1/table1-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs-midpoint6.csv
+
+  ## Generate make-table1-cohort_prevax-main-ami-output 
+
+  make-table1-cohort_prevax-main-ami-output:
+    run: r:v2 analysis/make_output/make_other_output.R table1 prevax cohort_prevax-main-ami
+    needs:
+    - table1-cohort_prevax-main-ami
+    outputs:
+      moderately_sensitive:
+        other_output_midpoint6: output/make_output/table1-cohort_prevax-main-ami_output_midpoint6.csv
+
+  ## Generate make-table1-cohort_prevax-main-stroke_sahhs-output 
+
+  make-table1-cohort_prevax-main-stroke_sahhs-output:
+    run: r:v2 analysis/make_output/make_other_output.R table1 prevax cohort_prevax-main-stroke_sahhs
+    needs:
+    - table1-cohort_prevax-main-stroke_sahhs
+    outputs:
+      moderately_sensitive:
+        other_output_midpoint6: output/make_output/table1-cohort_prevax-main-stroke_sahhs_output_midpoint6.csv
+
+  ## Generate make-table1-cohort_prevax-sub_covidhospital_FALSE-ami-output 
+
+  make-table1-cohort_prevax-sub_covidhospital_FALSE-ami-output:
+    run: r:v2 analysis/make_output/make_other_output.R table1 prevax cohort_prevax-sub_covidhospital_FALSE-ami
+    needs:
+    - table1-cohort_prevax-sub_covidhospital_FALSE-ami
+    outputs:
+      moderately_sensitive:
+        other_output_midpoint6: output/make_output/table1-cohort_prevax-sub_covidhospital_FALSE-ami_output_midpoint6.csv
+
+  ## Generate make-table1-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs-output
+
+    
+
+  make-table1-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs-output:
+    run: r:v2 analysis/make_output/make_other_output.R table1 prevax cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
+    needs:
+    - table1-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
+    outputs:
+      moderately_sensitive:
+        other_output_midpoint6: output/make_output/table1-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs_output_midpoint6.csv
+
+  ## Generate make-table1-cohort_prevax-sub_covidhospital_TRUE-ami-output 
+
+  make-table1-cohort_prevax-sub_covidhospital_TRUE-ami-output:
+    run: r:v2 analysis/make_output/make_other_output.R table1 prevax cohort_prevax-sub_covidhospital_TRUE-ami
+    needs:
+    - table1-cohort_prevax-sub_covidhospital_TRUE-ami
+    outputs:
+      moderately_sensitive:
+        other_output_midpoint6: output/make_output/table1-cohort_prevax-sub_covidhospital_TRUE-ami_output_midpoint6.csv
+
+  ## Generate make-table1-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs-output
+
+    
+
+  make-table1-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs-output:
+    run: r:v2 analysis/make_output/make_other_output.R table1 prevax cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
+    needs:
+    - table1-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
+    outputs:
+      moderately_sensitive:
+        other_output_midpoint6: output/make_output/table1-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs_output_midpoint6.csv
+
+  ## Generate table1_cohort_prevax-main-ami_subsample 
+
+  table1-cohort_prevax-main-ami_subsample:
+    run: 'r:v2 analysis/table1/table1_subsample.R cohort_prevax-main-ami 18;30;40;50;60;70;80;90 '
+    needs:
+    - generate_subsample_cohort_prevax-main-ami
+    outputs:
+      moderately_sensitive:
+        table1_subsample: output/table1/table1-cohort_prevax-main-ami_subsample.csv
+        table1_midpoint6_subsample: output/table1/table1-cohort_prevax-main-ami-midpoint6_subsample.csv
+
+  ## Generate table1_cohort_prevax-main-stroke_sahhs_subsample 
+
+  table1-cohort_prevax-main-stroke_sahhs_subsample:
+    run: 'r:v2 analysis/table1/table1_subsample.R cohort_prevax-main-stroke_sahhs
+      18;30;40;50;60;70;80;90 '
+    needs:
+    - generate_subsample_cohort_prevax-main-stroke_sahhs
+    outputs:
+      moderately_sensitive:
+        table1_subsample: output/table1/table1-cohort_prevax-main-stroke_sahhs_subsample.csv
+        table1_midpoint6_subsample: output/table1/table1-cohort_prevax-main-stroke_sahhs-midpoint6_subsample.csv
+
+  ## Generate table1_cohort_prevax-sub_covidhospital_FALSE-ami_subsample 
+
+  table1-cohort_prevax-sub_covidhospital_FALSE-ami_subsample:
+    run: 'r:v2 analysis/table1/table1_subsample.R cohort_prevax-sub_covidhospital_FALSE-ami
+      18;30;40;50;60;70;80;90 '
+    needs:
+    - generate_subsample_cohort_prevax-sub_covidhospital_FALSE-ami
+    outputs:
+      moderately_sensitive:
+        table1_subsample: output/table1/table1-cohort_prevax-sub_covidhospital_FALSE-ami_subsample.csv
+        table1_midpoint6_subsample: output/table1/table1-cohort_prevax-sub_covidhospital_FALSE-ami-midpoint6_subsample.csv
+
+  ## Generate table1_cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs_subsample
+
+    
+
+  table1-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs_subsample:
+    run: 'r:v2 analysis/table1/table1_subsample.R cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
+      18;30;40;50;60;70;80;90 '
+    needs:
+    - generate_subsample_cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
+    outputs:
+      moderately_sensitive:
+        table1_subsample: output/table1/table1-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs_subsample.csv
+        table1_midpoint6_subsample: output/table1/table1-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs-midpoint6_subsample.csv
+
+  ## Generate table1_cohort_prevax-sub_covidhospital_TRUE-ami_subsample 
+
+  table1-cohort_prevax-sub_covidhospital_TRUE-ami_subsample:
+    run: 'r:v2 analysis/table1/table1_subsample.R cohort_prevax-sub_covidhospital_TRUE-ami
+      18;30;40;50;60;70;80;90 '
+    needs:
+    - generate_subsample_cohort_prevax-sub_covidhospital_TRUE-ami
+    outputs:
+      moderately_sensitive:
+        table1_subsample: output/table1/table1-cohort_prevax-sub_covidhospital_TRUE-ami_subsample.csv
+        table1_midpoint6_subsample: output/table1/table1-cohort_prevax-sub_covidhospital_TRUE-ami-midpoint6_subsample.csv
+
+  ## Generate table1_cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs_subsample
+
+    
+
+  table1-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs_subsample:
+    run: 'r:v2 analysis/table1/table1_subsample.R cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
+      18;30;40;50;60;70;80;90 '
+    needs:
+    - generate_subsample_cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
+    outputs:
+      moderately_sensitive:
+        table1_subsample: output/table1/table1-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs_subsample.csv
+        table1_midpoint6_subsample: output/table1/table1-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs-midpoint6_subsample.csv
+
+  ## Generate lasso_var_selection-cohort_prevax-main-ami 
+
+  lasso_var_selection-cohort_prevax-main-ami:
+    run: 'r:v2 analysis/lasso_var_selection/lasso_var_selection.R cohort_prevax-main-ami
+      prevax 18;30;40;50;60;70;80;90 '
+    needs:
+    - generate_subsample_cohort_prevax-main-ami
+    - make_model_input_subsample-cohort_prevax-main-ami
+    outputs:
+      moderately_sensitive:
+        lasso_var_selection: output/lasso_var_selection/lasso_var_selection-cohort_prevax-main-ami.csv
+
+  ## Generate lasso_var_selection-cohort_prevax-main-stroke_sahhs 
+
+  lasso_var_selection-cohort_prevax-main-stroke_sahhs:
+    run: 'r:v2 analysis/lasso_var_selection/lasso_var_selection.R cohort_prevax-main-stroke_sahhs
+      prevax 18;30;40;50;60;70;80;90 '
+    needs:
+    - generate_subsample_cohort_prevax-main-stroke_sahhs
+    - make_model_input_subsample-cohort_prevax-main-stroke_sahhs
+    outputs:
+      moderately_sensitive:
+        lasso_var_selection: output/lasso_var_selection/lasso_var_selection-cohort_prevax-main-stroke_sahhs.csv
+
+  ## Generate lasso_var_selection-cohort_prevax-sub_covidhospital_FALSE-ami 
+
+  lasso_var_selection-cohort_prevax-sub_covidhospital_FALSE-ami:
+    run: 'r:v2 analysis/lasso_var_selection/lasso_var_selection.R cohort_prevax-sub_covidhospital_FALSE-ami
+      prevax 18;30;40;50;60;70;80;90 '
+    needs:
+    - generate_subsample_cohort_prevax-sub_covidhospital_FALSE-ami
+    - make_model_input_subsample-cohort_prevax-sub_covidhospital_FALSE-ami
+    outputs:
+      moderately_sensitive:
+        lasso_var_selection: output/lasso_var_selection/lasso_var_selection-cohort_prevax-sub_covidhospital_FALSE-ami.csv
+
+  ## Generate lasso_var_selection-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
+
+    
+
+  lasso_var_selection-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs:
+    run: 'r:v2 analysis/lasso_var_selection/lasso_var_selection.R cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
+      prevax 18;30;40;50;60;70;80;90 '
+    needs:
+    - generate_subsample_cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
+    - make_model_input_subsample-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
+    outputs:
+      moderately_sensitive:
+        lasso_var_selection: output/lasso_var_selection/lasso_var_selection-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs.csv
+
+  ## Generate lasso_var_selection-cohort_prevax-sub_covidhospital_TRUE-ami 
+
+  lasso_var_selection-cohort_prevax-sub_covidhospital_TRUE-ami:
+    run: 'r:v2 analysis/lasso_var_selection/lasso_var_selection.R cohort_prevax-sub_covidhospital_TRUE-ami
+      prevax 18;30;40;50;60;70;80;90 '
+    needs:
+    - generate_subsample_cohort_prevax-sub_covidhospital_TRUE-ami
+    - make_model_input_subsample-cohort_prevax-sub_covidhospital_TRUE-ami
+    outputs:
+      moderately_sensitive:
+        lasso_var_selection: output/lasso_var_selection/lasso_var_selection-cohort_prevax-sub_covidhospital_TRUE-ami.csv
+
+  ## Generate lasso_var_selection-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
+
+    
+
+  lasso_var_selection-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs:
+    run: 'r:v2 analysis/lasso_var_selection/lasso_var_selection.R cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
+      prevax 18;30;40;50;60;70;80;90 '
+    needs:
+    - generate_subsample_cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
+    - make_model_input_subsample-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
+    outputs:
+      moderately_sensitive:
+        lasso_var_selection: output/lasso_var_selection/lasso_var_selection-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs.csv
+
+  ## Generate lasso_X_var_selection-cohort_prevax-main-ami 
+
+  lasso_X_var_selection-cohort_prevax-main-ami:
+    run: 'r:v2 analysis/lasso_X_var_selection/lasso_X_var_selection.R cohort_prevax-main-ami
+      prevax 18;30;40;50;60;70;80;90 '
+    needs:
+    - generate_subsample_cohort_prevax-main-ami
+    - lasso_var_selection-cohort_prevax-main-ami
+    outputs:
+      moderately_sensitive:
+        lasso_X_var_selection: output/lasso_X_var_selection/lasso_X_var_selection-cohort_prevax-main-ami.csv
+
+  ## Generate lasso_X_var_selection-cohort_prevax-main-stroke_sahhs 
+
+  lasso_X_var_selection-cohort_prevax-main-stroke_sahhs:
+    run: 'r:v2 analysis/lasso_X_var_selection/lasso_X_var_selection.R cohort_prevax-main-stroke_sahhs
+      prevax 18;30;40;50;60;70;80;90 '
+    needs:
+    - generate_subsample_cohort_prevax-main-stroke_sahhs
+    - lasso_var_selection-cohort_prevax-main-stroke_sahhs
+    outputs:
+      moderately_sensitive:
+        lasso_X_var_selection: output/lasso_X_var_selection/lasso_X_var_selection-cohort_prevax-main-stroke_sahhs.csv
+
+  ## Generate lasso_X_var_selection-cohort_prevax-sub_covidhospital_FALSE-ami
+
+    
+
+  lasso_X_var_selection-cohort_prevax-sub_covidhospital_FALSE-ami:
+    run: 'r:v2 analysis/lasso_X_var_selection/lasso_X_var_selection.R cohort_prevax-sub_covidhospital_FALSE-ami
+      prevax 18;30;40;50;60;70;80;90 '
+    needs:
+    - generate_subsample_cohort_prevax-sub_covidhospital_FALSE-ami
+    - lasso_var_selection-cohort_prevax-sub_covidhospital_FALSE-ami
+    outputs:
+      moderately_sensitive:
+        lasso_X_var_selection: output/lasso_X_var_selection/lasso_X_var_selection-cohort_prevax-sub_covidhospital_FALSE-ami.csv
+
+  ## Generate lasso_X_var_selection-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
+
+    
+
+  lasso_X_var_selection-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs:
+    run: 'r:v2 analysis/lasso_X_var_selection/lasso_X_var_selection.R cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
+      prevax 18;30;40;50;60;70;80;90 '
+    needs:
+    - generate_subsample_cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
+    - lasso_var_selection-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
+    outputs:
+      moderately_sensitive:
+        lasso_X_var_selection: output/lasso_X_var_selection/lasso_X_var_selection-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs.csv
+
+  ## Generate lasso_X_var_selection-cohort_prevax-sub_covidhospital_TRUE-ami
+
+    
+
+  lasso_X_var_selection-cohort_prevax-sub_covidhospital_TRUE-ami:
+    run: 'r:v2 analysis/lasso_X_var_selection/lasso_X_var_selection.R cohort_prevax-sub_covidhospital_TRUE-ami
+      prevax 18;30;40;50;60;70;80;90 '
+    needs:
+    - generate_subsample_cohort_prevax-sub_covidhospital_TRUE-ami
+    - lasso_var_selection-cohort_prevax-sub_covidhospital_TRUE-ami
+    outputs:
+      moderately_sensitive:
+        lasso_X_var_selection: output/lasso_X_var_selection/lasso_X_var_selection-cohort_prevax-sub_covidhospital_TRUE-ami.csv
+
+  ## Generate lasso_X_var_selection-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
+
+    
+
+  lasso_X_var_selection-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs:
+    run: 'r:v2 analysis/lasso_X_var_selection/lasso_X_var_selection.R cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
+      prevax 18;30;40;50;60;70;80;90 '
+    needs:
+    - generate_subsample_cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
+    - lasso_var_selection-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
+    outputs:
+      moderately_sensitive:
+        lasso_X_var_selection: output/lasso_X_var_selection/lasso_X_var_selection-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs.csv
+
+  ## Generate lasso_union_var_selection_cohort_prevax-main-ami 
+
+  lasso_union_var_selection-cohort_prevax-main-ami:
+    run: 'r:v2 analysis/lasso_union_var_selection/lasso_union_var_selection.R cohort_prevax-main-ami
+      prevax 18;30;40;50;60;70;80;90 '
+    needs:
+    - lasso_var_selection-cohort_prevax-main-ami
+    - lasso_X_var_selection-cohort_prevax-main-ami
+    outputs:
+      moderately_sensitive:
+        lasso_union_var_selection: output/lasso_union_var_selection/lasso_union_var_selection-cohort_prevax-main-ami.csv
+
+  ## Generate lasso_union_var_selection_cohort_prevax-main-stroke_sahhs 
+
+  lasso_union_var_selection-cohort_prevax-main-stroke_sahhs:
+    run: 'r:v2 analysis/lasso_union_var_selection/lasso_union_var_selection.R cohort_prevax-main-stroke_sahhs
+      prevax 18;30;40;50;60;70;80;90 '
+    needs:
+    - lasso_var_selection-cohort_prevax-main-stroke_sahhs
+    - lasso_X_var_selection-cohort_prevax-main-stroke_sahhs
+    outputs:
+      moderately_sensitive:
+        lasso_union_var_selection: output/lasso_union_var_selection/lasso_union_var_selection-cohort_prevax-main-stroke_sahhs.csv
+
+  ## Generate lasso_union_var_selection_cohort_prevax-sub_covidhospital_FALSE-ami
+
+    
+
+  lasso_union_var_selection-cohort_prevax-sub_covidhospital_FALSE-ami:
+    run: 'r:v2 analysis/lasso_union_var_selection/lasso_union_var_selection.R cohort_prevax-sub_covidhospital_FALSE-ami
+      prevax 18;30;40;50;60;70;80;90 '
+    needs:
+    - lasso_var_selection-cohort_prevax-sub_covidhospital_FALSE-ami
+    - lasso_X_var_selection-cohort_prevax-sub_covidhospital_FALSE-ami
+    outputs:
+      moderately_sensitive:
+        lasso_union_var_selection: output/lasso_union_var_selection/lasso_union_var_selection-cohort_prevax-sub_covidhospital_FALSE-ami.csv
+
+  ## Generate lasso_union_var_selection_cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
+
+    
+
+  lasso_union_var_selection-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs:
+    run: 'r:v2 analysis/lasso_union_var_selection/lasso_union_var_selection.R cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
+      prevax 18;30;40;50;60;70;80;90 '
+    needs:
+    - lasso_var_selection-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
+    - lasso_X_var_selection-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
+    outputs:
+      moderately_sensitive:
+        lasso_union_var_selection: output/lasso_union_var_selection/lasso_union_var_selection-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs.csv
+
+  ## Generate lasso_union_var_selection_cohort_prevax-sub_covidhospital_TRUE-ami
+
+    
+
+  lasso_union_var_selection-cohort_prevax-sub_covidhospital_TRUE-ami:
+    run: 'r:v2 analysis/lasso_union_var_selection/lasso_union_var_selection.R cohort_prevax-sub_covidhospital_TRUE-ami
+      prevax 18;30;40;50;60;70;80;90 '
+    needs:
+    - lasso_var_selection-cohort_prevax-sub_covidhospital_TRUE-ami
+    - lasso_X_var_selection-cohort_prevax-sub_covidhospital_TRUE-ami
+    outputs:
+      moderately_sensitive:
+        lasso_union_var_selection: output/lasso_union_var_selection/lasso_union_var_selection-cohort_prevax-sub_covidhospital_TRUE-ami.csv
+
+  ## Generate lasso_union_var_selection_cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
+
+    
+
+  lasso_union_var_selection-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs:
+    run: 'r:v2 analysis/lasso_union_var_selection/lasso_union_var_selection.R cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
+      prevax 18;30;40;50;60;70;80;90 '
+    needs:
+    - lasso_var_selection-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
+    - lasso_X_var_selection-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
+    outputs:
+      moderately_sensitive:
+        lasso_union_var_selection: output/lasso_union_var_selection/lasso_union_var_selection-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs.csv
+

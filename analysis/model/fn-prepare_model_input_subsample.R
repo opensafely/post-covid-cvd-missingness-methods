@@ -19,7 +19,7 @@ prepare_model_input_subsample <- function(name) {
   # subsample in place of study population
   input <- readr::read_rds(paste0(
     "output/generate_subsample/input_",
-    active_analyses$cohort,
+    name,
     "_clean_across_MI_subsample.rds"
   ))
 

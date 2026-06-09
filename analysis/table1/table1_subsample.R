@@ -8,8 +8,8 @@
 # using the subsample data instead of the full population
 #
 # Arguments:
-#  - cohort - string, defines which of three opensafely cohorts to describe
-#             (prevax, vax, unvax)
+#  - name    - string, defines cohort and outcome
+#              e.g. "cohort_prevax-main-ami"
 #  - age_str - vector of form "XX;XX;XX;XX;XX"
 #              defines the age ranges over which the study population is stratified
 #  - preex - boolean/string, defines preexisting conditions
@@ -55,12 +55,12 @@ print(length(args))
 
 if (length(args) == 0) {
   # default argument values
-  cohort  <- "prevax"
-  age_str <- "18;30;40;50;50;70;80;90"
+  name    <- "cohort_prevax-main-ami"
+  age_str <- "18;30;40;50;60;70;80;90"
   preex   <- "All"
 } else {
   # YAML arguments
-  cohort  <- args[[1]]
+  name    <- args[[1]]
   age_str <- args[[2]]
 
   # optional argument
@@ -78,7 +78,7 @@ print("Load data")
 
 df <- readr::read_rds(paste0(
   "output/generate_subsample/input_",
-  cohort,
+  name,
   "_clean_across_MI_subsample.rds"
 ))
 
@@ -192,7 +192,7 @@ print("Save Table 1")
 
 write.csv(
   df,
-  paste0(table1_dir, "table1-cohort_", cohort, preex_string, "_subsample.csv"),
+  paste0(table1_dir, "table1-", name, preex_string, "_subsample.csv"),
   row.names = FALSE
 )
 
@@ -266,6 +266,6 @@ print("Save rounded Table 1")
 
 write.csv(
   df,
-  paste0(table1_dir, "table1-cohort_", cohort, preex_string, "-midpoint6_subsample.csv"),
+  paste0(table1_dir, "table1-", name, preex_string, "-midpoint6_subsample.csv"),
   row.names = FALSE
 )

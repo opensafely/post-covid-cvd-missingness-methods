@@ -12,6 +12,8 @@
 #             (table1, table2, etc)
 #  - cohort - string, specifies which study cohort is being processed
 #             (prevax, vax, unvax)
+#  - name    - string, defines cohort and outcome
+#              e.g. "cohort_prevax-main-ami"
 #  - subgroup - string, specifies other subgroups by which the study population
 #               can be divided (e.g. main, covid hospitalisation)
 #
@@ -51,16 +53,18 @@ print('Specify arguments')
 args <- commandArgs(trailingOnly = TRUE)
 
 if (length(args) == 0) {
-  output <- "table1" # the action to apply
-  cohorts <- "prevax-preex_FALSE;vax-preex_FALSE;unvax-preex_FALSE;prevax-preex_TRUE;vax-preex_TRUE;unvax-preex_TRUE" # The iterative label
+  output   <- "table1" # the action to apply
+  cohorts  <- "prevax-preex_FALSE;prevax-preex_TRUE" # The iterative label
+  name     <- "cohort_prevax-main-ami"
   subgroup <- ""
 } else {
-  output <- args[[1]]
+  output  <- args[[1]]
   cohorts <- args[[2]]
-  if (length(args) < 3) {
+  name    <- args[[3]]
+  if (length(args) < 4) {
     subgroup <- "" # an optional subgroup label (e.g. preex_FALSE)
   } else {
-    subgroup <- args[[3]]
+    subgroup <- args[[4]]
   }
 }
 
@@ -90,6 +94,8 @@ df <- NULL
 # Add output from each cohort --------------------------------------------------
 print('Add output from each cohort')
 
+outcome_from_name <- stringr::str_split_fixed(name, "-", n = 2)[[2]]
+
 for (i in cohorts) {
   # load input
   tmp <- readr::read_csv(paste0(
@@ -99,6 +105,8 @@ for (i in cohorts) {
     output,
     "-cohort_",
     i,
+    "-",
+    outcome_from_name,
     sub_str,
     "-midpoint6.csv"
   ))
@@ -162,6 +170,6 @@ print('Save output')
 
 readr::write_csv(
   df,
-  paste0(makeout_dir, output, sub_str, "_output_midpoint6.csv"),
+  paste0(makeout_dir, output, sub_str, "-", name, "_output_midpoint6.csv"),
   na = "-"
 )

@@ -90,7 +90,7 @@ print("Applying multiple imputation to BMI and smoking covariates")
 # set random seed
 set.seed(2026)
 
-# convert all dates to numeric
+# convert all dates to numeric, necessary here
 df <- (df %>% mutate_if(lubridate::is.Date, as.numeric))
 
 # censorship
@@ -202,6 +202,9 @@ df_post_imputation <- subset(
   select = -c(.imp, .id)
 )
 
+print(summary(df_post_imputation))
+stop("!!!")
+
 df_dates_stacked <- rbind(
   df_dates, df_dates, df_dates, df_dates, df_dates,
   df_dates, df_dates, df_dates, df_dates, df_dates
@@ -242,6 +245,21 @@ new_patient_id <- c(
 )
 
 df_post_imputation$patient_id   <- new_patient_id
+
+# Re-convert date variables to date type
+all_date_vars   <- grep("date", colnames(df_post_imputation))
+for (var in all_date_vars) {
+  df_post_imputation[, var] <- as.Date(format(as.Date(df_post_imputation[, var], origin = lubridate::origin), "%Y-%m-%d"))
+}
+
+# check missingness of smoking and bmi variables
+percent_smoking_missing <- signif(100 * (sum(is.na(df_post_imputation$cov_cat_smoking)) / length(df_post_imputation$cov_cat_smoking)), digits = 4)
+percent_bmi_missing     <- signif(100 * (sum(is.na(df_post_imputation$cov_num_bmi))     / length(df_post_imputation$cov_num_bmi)),     digits = 4)
+
+print(paste0("The variable smoking is ", percent_smoking_missing, "% missing"))
+print(paste0("The variable bmi is ",     percent_bmi_missing,     "% missing"))
+
+stop("check")
 
 
 # Save data after 'across' multiple imputation  ---
