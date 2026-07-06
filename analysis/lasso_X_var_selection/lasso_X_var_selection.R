@@ -103,6 +103,7 @@ df2 <- (df %>% select(c(
 
   cov_num_age,
   cov_cat_sex,
+  cov_num_bmi,
   cov_cat_ethnicity,
   cov_cat_imd,
   cov_cat_smoking,
@@ -135,6 +136,9 @@ df2 <- (df %>% select(c(
   strat_cat_region
 )))
 
+# prevent conversion to factor
+df2$cov_num_bmi <- as.numeric(df2$cov_num_bmi)
+
 
 # Data preparation for the lasso_X logistic model ------------------------------
 message("Data preparation for the lasso_X logistic model")
@@ -144,6 +148,7 @@ message("Data preparation for the lasso_X logistic model")
 lasso_X_conf_matrix <- (df %>% select(c(
   cov_num_age,
   cov_cat_sex,
+  cov_num_bmi,
   cov_cat_ethnicity,
   cov_cat_imd,
   cov_cat_smoking,
@@ -175,6 +180,9 @@ lasso_X_conf_matrix <- (df %>% select(c(
   cov_bin_hrt,
   strat_cat_region
 )))
+
+# prevent conversion to factor
+lasso_X_conf_matrix$cov_num_bmi <- as.numeric(lasso_X_conf_matrix$cov_num_bmi)
 
 lasso_X_conf_matrix_preserving_factors <- model.matrix(
    ~ ., # formula meaning take all terms
@@ -254,7 +262,7 @@ write.csv(
 write.csv(
   lasso_X_coefs,
   paste0(lasso_X_var_selection_dir, "lasso_X_var_selection-coefs-", name, preex_string, ".csv"),
-  row.names = FALSE
+  row.names = TRUE
 )
 
 write.csv(

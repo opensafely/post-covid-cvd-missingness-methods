@@ -123,6 +123,7 @@ df2 <- (model_input_df %>% select(c(
 
   cov_num_age,
   cov_cat_sex,
+  cov_num_bmi,
   cov_cat_ethnicity,
   cov_cat_imd,
   cov_cat_smoking,
@@ -155,6 +156,9 @@ df2 <- (model_input_df %>% select(c(
   strat_cat_region
 )))
 
+# prevent conversion to factor
+df2$cov_num_bmi <- as.numeric(df2$cov_num_bmi)
+
 
 # Data preparation for lasso cox model ----------------------------------
 message("Data preparation for lasso cox model")
@@ -164,6 +168,7 @@ lasso_cox_conf_matrix <- (model_input_df %>% select(c(
 
   cov_num_age,
   cov_cat_sex,
+  cov_num_bmi,
   cov_cat_ethnicity,
   cov_cat_imd,
   cov_cat_smoking,
@@ -195,6 +200,9 @@ lasso_cox_conf_matrix <- (model_input_df %>% select(c(
   cov_bin_hrt,
   strat_cat_region
 )))
+
+# prevent conversion to factor
+lasso_cox_conf_matrix$cov_num_bmi <- as.numeric(lasso_cox_conf_matrix$cov_num_bmi)
 
 lasso_cox_conf_matrix_preserving_factors <- model.matrix(
    ~ ., # formula meaning take all terms

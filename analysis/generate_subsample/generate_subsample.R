@@ -96,6 +96,7 @@ df_ami$cov_bin_covid <- as.factor(df_ami$cov_bin_covid) # exposure
 
 df_ami$cov_num_age       <- as.numeric(df_ami$cov_num_age)
 df_ami$cov_cat_sex       <- as.factor(df_ami$cov_cat_sex)
+df_ami$cov_num_bmi       <- as.factor(df_ami$cov_num_bmi)
 df_ami$cov_cat_ethnicity <- as.factor(df_ami$cov_cat_ethnicity)
 df_ami$cov_cat_imd       <- as.factor(df_ami$cov_cat_imd)
 df_ami$cov_cat_smoking   <- as.factor(df_ami$cov_cat_smoking)
@@ -134,6 +135,7 @@ df_sahhs$cov_bin_covid <- as.factor(df_sahhs$cov_bin_covid) # exposure
 
 df_sahhs$cov_num_age       <- as.numeric(df_sahhs$cov_num_age)
 df_sahhs$cov_cat_sex       <- as.factor(df_sahhs$cov_cat_sex)
+df_sahhs$cov_num_bmi       <- as.factor(df_sahhs$cov_num_bmi)
 df_sahhs$cov_cat_ethnicity <- as.factor(df_sahhs$cov_cat_ethnicity)
 df_sahhs$cov_cat_imd       <- as.factor(df_sahhs$cov_cat_imd)
 df_sahhs$cov_cat_smoking   <- as.factor(df_sahhs$cov_cat_smoking)

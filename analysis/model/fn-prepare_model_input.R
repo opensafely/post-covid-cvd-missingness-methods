@@ -43,6 +43,7 @@ prepare_model_input <- function(name) {
     active_analyses$strata,
     active_analyses$covariate_age,
     "cov_cat_sex",
+    "cov_num_bmi",
     "cov_cat_ethnicity",
     "cov_cat_smoking",
     "cov_bin_covid",
@@ -122,7 +123,7 @@ prepare_model_input <- function(name) {
     ) %>%
     dplyr::ungroup()
 
-  keep <- c(keep, "cov_bin_covid", "cov_bin_sahhs")
+  keep <- c(keep, "cov_num_bmi", "cov_bin_covid", "cov_bin_sahhs")
 
   return(list(input = input, keep = keep))
 }

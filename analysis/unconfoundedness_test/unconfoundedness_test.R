@@ -122,6 +122,7 @@ logistic_df <- (df %>% select(c(
 
   cov_num_age,
   cov_cat_sex,
+  cov_num_bmi,
   cov_cat_ethnicity,
   cov_cat_imd,
   cov_cat_smoking,
@@ -153,6 +154,9 @@ logistic_df <- (df %>% select(c(
   cov_bin_hrt,
   strat_cat_region
 )))
+
+# prevent conversion to factor
+logistic_df$cov_num_bmi <- as.numeric(logistic_df$cov_num_bmi)
 
 
 # Data preparation for cox model ----------------------------------
@@ -168,6 +172,7 @@ cox_df <- (model_input_df %>% select(c(
 
   cov_num_age,
   cov_cat_sex,
+  cov_num_bmi,
   cov_cat_ethnicity,
   cov_cat_imd,
   cov_cat_smoking,
@@ -199,6 +204,9 @@ cox_df <- (model_input_df %>% select(c(
   cov_bin_hrt,
   strat_cat_region
 )))
+
+# prevent conversion to factor
+cox_df$cov_num_bmi <- as.numeric(cox_df$cov_num_bmi)
 
 cox_df$outcome_cox_dates <- rep(as.Date(NA), times = nrow(cox_df))
 cox_df$cens_status       <- rep(NA, times = nrow(cox_df))
