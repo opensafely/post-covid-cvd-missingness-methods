@@ -81,6 +81,7 @@ fit_model <- function(
       data = df,
       weight = df$cox_stacked_weight, # weights for stacked dataset (across MI)
       method = "breslow",
+      robust = TRUE, # use robust var -> robust SE
       surv = TRUE,
       x = TRUE,
       y = TRUE
@@ -94,6 +95,7 @@ fit_model <- function(
       formula = as.formula(surv_formula),
       data = df,
       method = "breslow",
+      robust = TRUE, # use robust var -> robust SE
       surv = TRUE,
       x = TRUE,
       y = TRUE
@@ -164,6 +166,7 @@ fit_model <- function(
         data = df,
         weight = df$cox_weight,
         method = "breslow",
+        robust = TRUE, # use robust var -> robust SE
         surv = TRUE,
         x = TRUE,
         y = TRUE
@@ -177,6 +180,7 @@ fit_model <- function(
         formula = as.formula(surv_formula_adj),
         data = df,
         method = "breslow",
+        robust = TRUE, # use robust var -> robust SE
         surv = TRUE,
         x = TRUE,
         y = TRUE
