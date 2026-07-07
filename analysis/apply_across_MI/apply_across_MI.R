@@ -222,6 +222,27 @@ my_formulas <- list(
 # Calculate Nelson-Aalen Estimator for outcome -----------
 print("Calculate Nelson-Aalen Estimator for outcome")
 
+nelsonaalen <- function(data, timevar, statusvar, ...) {
+  if (!is.data.frame(data)) {
+    stop("Data must be a data frame")
+  }
+  timevar <- as.character(substitute(timevar))
+  statusvar <- as.character(substitute(statusvar))
+  time <- data[, timevar, drop = TRUE]
+  status <- data[, statusvar, drop = TRUE]
+
+  coxph_obj <- survival::coxph(survival::Surv(time, status) ~ 1, ...)
+  hazard <- survival::basehaz(coxph_obj)
+
+  # Adjust depending on near-tie correction
+  idx <- if (coxph_obj$timefix) {
+    match(coxph_obj$y[, "time"], hazard[, "time"])
+  } else match(time, hazard[, "time"])
+
+
+  return (hazard[idx, "hazard"])
+}
+
 df_ami   <- df
 df_sahhs <- df
 
@@ -271,20 +292,16 @@ df_sahhs$outcome_cox_dates_sahhs <- as.numeric(outcome_cox_dates_sahhs)
 df_sahhs$cens_status_sahhs       <- cens_status_sahhs
 
 # ami
-H0          <- (survfit(Surv(outcome_cox_dates_ami, cens_status_ami) ~ 1, data = df_ami) %>% summary(times = unique(df_ami$outcome_cox_dates_ami)))
-H0          <- H0[c("time", "surv")]
-names(H0)   <- c("outcome_cox_dates_ami", "surv")
-H0          <- as.data.frame(H0)
-df_ami <- merge(df_ami, H0, all.x = TRUE, by = "outcome_cox_dates_ami")
-df_ami <- rename(df_ami, H0 = surv)
+df_ami_nelsonaalen    <- data.frame(time = df_ami$outcome_cox_dates_ami, status = df_ami$cens_status_ami)
+H0_ami                <- nelsonaalen(df_ami_nelsonaalen, time, status)
+df_ami_nelsonaalen$H0 <- H0_ami
+df_ami$H0             <- H0_ami
 
 # sahhs
-H0          <- (survfit(Surv(outcome_cox_dates_sahhs, cens_status_sahhs) ~ 1, data = df_sahhs) %>% summary(times = unique(df_sahhs$outcome_cox_dates_sahhs)))
-H0          <- H0[c("time", "surv")]
-names(H0)   <- c("outcome_cox_dates_sahhs", "surv")
-H0          <- as.data.frame(H0)
-df_sahhs <- merge(df_sahhs, H0, all.x = TRUE, by = "outcome_cox_dates_sahhs")
-df_sahhs <- rename(df_sahhs, H0 = surv)
+df_sahhs_nelsonaalen    <- data.frame(time = df_sahhs$outcome_cox_dates_sahhs, status = df_sahhs$cens_status_sahhs)
+H0_sahhs                <- nelsonaalen(df_sahhs_nelsonaalen, time, status)
+df_sahhs_nelsonaalen$H0 <- H0_sahhs
+df_sahhs$H0             <- H0_sahhs
 
 
 # Applying multiple imputation to BMI and smoking covariates for outcome ---
@@ -517,7 +534,6 @@ df_post_imputation_sahhs_clean <- (
 )
 
 
-
 # Save data after 'across' multiple imputation  ---
 print("Save data after 'across' multiple imputation ")
 
@@ -528,8 +544,8 @@ saveRDS(
 )
 
 saveRDS(
-  df_post_imputation_ami,
-  file = paste0("output/dataset_clean/input_", cohort, "_clean_ami_diagnostic.rds"),
+  df_ami_nelsonaalen,
+  file = paste0("output/dataset_clean/nelson_aalen_", cohort, "_ami.rds"),
   compress = TRUE
 )
 
@@ -540,7 +556,7 @@ saveRDS(
 )
 
 saveRDS(
-  df_post_imputation_sahhs,
-  file = paste0("output/dataset_clean/input_", cohort, "_clean_sahhs_diagnostic.rds"),
+  df_sahhs_nelsonaalen,
+  file = paste0("output/dataset_clean/nelson_aalen_", cohort, "_sahhs.rds"),
   compress = TRUE
 )

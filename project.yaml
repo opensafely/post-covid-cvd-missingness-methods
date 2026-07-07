@@ -65,9 +65,20 @@ actions:
     outputs:
       highly_sensitive:
         cohort_clean_ami: output/dataset_clean/input_prevax_clean_ami.rds
-        cohort_clean_ami_diagnostic: output/dataset_clean/input_prevax_clean_ami_diagnostic.rds
         cohort_clean_sahhs: output/dataset_clean/input_prevax_clean_sahhs.rds
-        cohort_clean_sahhs_diagnostic: output/dataset_clean/input_prevax_clean_sahhs_diagnostic.rds
+        nelsonaalen_ami: output/dataset_clean/nelson_aalen_prevax_ami.rds
+        nelsonaalen_sahhs: output/dataset_clean/nelson_aalen_prevax_sahhs.rds
+
+  ## nelson_aalen_plots_cohort_prevax 
+
+  nelson_aalen_plots_cohort_prevax:
+    run: r:latest analysis/nelson_aalen_plots/nelson_aalen_plots.R prevax
+    needs:
+    - apply_across_MI_cohort_prevax
+    outputs:
+      highly_sensitive:
+        nelsonaalen_plot_ami: output/dataset_clean/nelson_aalen_prevax_ami.png
+        nelsonaalen_plot_sahhs: output/dataset_clean/nelson_aalen_prevax_sahhs.png
 
   ## generate_subsample_cohort_prevax 
 

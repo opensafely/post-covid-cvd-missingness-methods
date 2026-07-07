@@ -198,10 +198,31 @@ apply_across_MI <- function(cohort) {
         glue("generate_input_{cohort}_clean")
       ),
       highly_sensitive = list(
-        cohort_clean_ami              = glue("output/dataset_clean/input_{cohort}_clean_ami.rds"),
-        cohort_clean_ami_diagnostic   = glue("output/dataset_clean/input_{cohort}_clean_ami_diagnostic.rds"),
-        cohort_clean_sahhs            = glue("output/dataset_clean/input_{cohort}_clean_sahhs.rds"),
-        cohort_clean_sahhs_diagnostic = glue("output/dataset_clean/input_{cohort}_clean_sahhs_diagnostic.rds")
+        cohort_clean_ami   = glue("output/dataset_clean/input_{cohort}_clean_ami.rds"),
+        cohort_clean_sahhs = glue("output/dataset_clean/input_{cohort}_clean_sahhs.rds"),
+        nelsonaalen_ami    = glue("output/dataset_clean/nelson_aalen_{cohort}_ami.rds"),
+        nelsonaalen_sahhs  = glue("output/dataset_clean/nelson_aalen_{cohort}_sahhs.rds")
+      )
+    )
+  )
+}
+
+
+nelson_aalen_plots <- function(cohort) {
+  splice(
+    comment(glue("nelson_aalen_plots_cohort_{cohort}")),
+    action(
+      name = glue("nelson_aalen_plots_cohort_{cohort}"),
+      run = glue(
+        "r:latest analysis/nelson_aalen_plots/nelson_aalen_plots.R"
+      ),
+      arguments = c(c(cohort)),
+      needs = list(
+        glue("apply_across_MI_cohort_{cohort}")
+      ),
+      highly_sensitive = list(
+        nelsonaalen_plot_ami    = glue("output/dataset_clean/nelson_aalen_{cohort}_ami.png"),
+        nelsonaalen_plot_sahhs  = glue("output/dataset_clean/nelson_aalen_{cohort}_sahhs.png")
       )
     )
   )
@@ -1113,6 +1134,15 @@ actions_list <- splice(
   splice(
     unlist(
       lapply(cohorts, function(x) apply_across_MI(cohort = x)),
+      recursive = FALSE
+    )
+  ),
+
+  ## Apply across multiple imputation ------------------------------------------
+  
+  splice(
+    unlist(
+      lapply(cohorts, function(x) nelson_aalen_plots(cohort = x)),
       recursive = FALSE
     )
   ),
