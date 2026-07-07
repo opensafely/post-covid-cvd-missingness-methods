@@ -56,6 +56,17 @@ actions:
         venn: output/dataset_clean/venn-cohort_prevax.rds
         cohort_clean: output/dataset_clean/input_prevax_clean_prehoc.rds
 
+  ## table_missingness_cohort_prevax 
+
+  table_missingness_cohort_prevax:
+    run: r:latest analysis/table_missingness/table_missingness.R prevax
+    needs:
+    - generate_input_prevax_clean
+    - generate_input_prevax
+    outputs:
+      moderately_sensitive:
+        table_missingness: output/table_missingness/table_missingness_cohort_prevax.csv
+
   ## apply_across_MI_cohort_prevax 
 
   apply_across_MI_cohort_prevax:

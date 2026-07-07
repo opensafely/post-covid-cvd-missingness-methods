@@ -184,6 +184,28 @@ clean_data <- function(cohort, describe = describe) {
 }
 
 
+# Create function to make missingness table ---------------------------
+table_missingness <- function(cohort) {
+  splice(
+    comment(glue("table_missingness_cohort_{cohort}")),
+    action(
+      name = glue("table_missingness_cohort_{cohort}"),
+      run = glue(
+        "r:latest analysis/table_missingness/table_missingness.R"
+      ),
+      arguments = c(c(cohort)),
+      needs = list(
+        glue("generate_input_{cohort}_clean"),
+        glue("generate_input_{cohort}")
+      ),
+      moderately_sensitive = list(
+        table_missingness  = glue("output/table_missingness/table_missingness_cohort_{cohort}.csv")
+      )
+    )
+  )
+}
+
+
 # Create function to apply across multiple imputation ---------------------------
 apply_across_MI <- function(cohort) {
   splice(
@@ -1125,6 +1147,15 @@ actions_list <- splice(
   splice(
     unlist(
       lapply(cohorts, function(x) clean_data(cohort = x, describe = describe)),
+      recursive = FALSE
+    )
+  ),
+
+  ## Make missingness table ----------------------------------------------------
+  
+  splice(
+    unlist(
+      lapply(cohorts, function(x) table_missingness(cohort = x)),
       recursive = FALSE
     )
   ),
