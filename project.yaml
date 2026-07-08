@@ -89,7 +89,9 @@ actions:
     outputs:
       highly_sensitive:
         nelsonaalen_plot_ami: output/dataset_clean/nelson_aalen_prevax_ami.png
+        nelsonaalen_plot_ami_ggplot: output/dataset_clean/nelson_aalen_prevax_ami_ggplot.png
         nelsonaalen_plot_sahhs: output/dataset_clean/nelson_aalen_prevax_sahhs.png
+        nelsonaalen_plot_sahhs_ggplot: output/dataset_clean/nelson_aalen_prevax_sahhs_ggplot.png
 
   ## generate_subsample_cohort_prevax 
 

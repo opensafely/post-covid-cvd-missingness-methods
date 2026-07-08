@@ -243,8 +243,10 @@ nelson_aalen_plots <- function(cohort) {
         glue("apply_across_MI_cohort_{cohort}")
       ),
       highly_sensitive = list(
-        nelsonaalen_plot_ami    = glue("output/dataset_clean/nelson_aalen_{cohort}_ami.png"),
-        nelsonaalen_plot_sahhs  = glue("output/dataset_clean/nelson_aalen_{cohort}_sahhs.png")
+        nelsonaalen_plot_ami           = glue("output/dataset_clean/nelson_aalen_{cohort}_ami.png"),
+        nelsonaalen_plot_ami_ggplot    = glue("output/dataset_clean/nelson_aalen_{cohort}_ami_ggplot.png"),
+        nelsonaalen_plot_sahhs         = glue("output/dataset_clean/nelson_aalen_{cohort}_sahhs.png"),
+        nelsonaalen_plot_sahhs_ggplot  = glue("output/dataset_clean/nelson_aalen_{cohort}_sahhs_ggplot.png")
       )
     )
   )

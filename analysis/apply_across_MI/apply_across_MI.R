@@ -222,7 +222,47 @@ my_formulas <- list(
 # Calculate Nelson-Aalen Estimator for outcome -----------
 print("Calculate Nelson-Aalen Estimator for outcome")
 
-nelsonaalen <- function(data, timevar, statusvar, ...) {
+basehaz_with_SE <- function(fit, newdata, centered = TRUE) 
+{
+  if (inherits(fit, "coxphms"))
+    stop("the basehaz function is not implemented for multi-state models")
+  if (!inherits(fit, "coxph")) 
+    stop("must be a coxph object")
+  if (!missing(newdata)) {
+    sfit <- survfit(fit, newdata=newdata, se.fit=TRUE)
+    chaz <- sfit$cumhaz
+  }
+  else {
+    sfit <- survfit(fit, se.fit=TRUE)
+    if (!centered) {
+      # The right thing to do here is to call survfit with a vector of
+      #  all zeros for the "subject to predict".  But if there is a factor
+      #  in the model, there may be no subject at all who will give all
+      #  zeros, so we post process instead
+      zcoef <- ifelse(is.na(coef(fit)), 0, coef(fit))
+      offset <- sum(fit$means * zcoef)
+      chaz <- sfit$cumhaz * exp(-offset)
+    }
+    else {
+      chaz <- sfit$cumhaz
+    }
+  }
+
+  new <- data.frame(
+    hazard         = chaz,
+    time           = sfit$time,
+    std_err_cumhaz = sfit$std.err
+  )
+
+  strata <- sfit$strata
+  if (!is.null(strata)) {
+    new$strata <- factor(rep(names(strata), strata), levels = names(strata))
+  }
+
+  return (new)
+}
+
+nelsonaalen_with_SE <- function(data, timevar, statusvar, ...) {
   if (!is.data.frame(data)) {
     stop("Data must be a data frame")
   }
@@ -232,15 +272,19 @@ nelsonaalen <- function(data, timevar, statusvar, ...) {
   status <- data[, statusvar, drop = TRUE]
 
   coxph_obj <- survival::coxph(survival::Surv(time, status) ~ 1, ...)
-  hazard <- survival::basehaz(coxph_obj)
+  hazard <- basehaz_with_SE(coxph_obj)
 
   # Adjust depending on near-tie correction
   idx <- if (coxph_obj$timefix) {
     match(coxph_obj$y[, "time"], hazard[, "time"])
   } else match(time, hazard[, "time"])
+  
+  nelsonaalen_estimates_with_SE <- data.frame(
+    nelsonaalen_estimates = hazard[idx, "hazard"],
+    nelsonaalen_se        = hazard[idx, "std_err_cumhaz"]
+  )
 
-
-  return (hazard[idx, "hazard"])
+  return (nelsonaalen_estimates_with_SE)
 }
 
 df_ami   <- df
@@ -293,15 +337,17 @@ df_sahhs$cens_status_sahhs       <- cens_status_sahhs
 
 # ami
 df_ami_nelsonaalen    <- data.frame(time = df_ami$outcome_cox_dates_ami, status = df_ami$cens_status_ami)
-H0_ami                <- nelsonaalen(df_ami_nelsonaalen, time, status)
-df_ami_nelsonaalen$H0 <- H0_ami
-df_ami$H0             <- H0_ami
+H0_ami                <- nelsonaalen_with_SE(df_ami_nelsonaalen, time, status)
+df_ami_nelsonaalen$H0 <- H0_ami$nelsonaalen_estimates
+df_ami_nelsonaalen$se <- H0_ami$nelsonaalen_se
+df_ami$H0             <- H0_ami$nelsonaalen_estimates
 
 # sahhs
 df_sahhs_nelsonaalen    <- data.frame(time = df_sahhs$outcome_cox_dates_sahhs, status = df_sahhs$cens_status_sahhs)
-H0_sahhs                <- nelsonaalen(df_sahhs_nelsonaalen, time, status)
-df_sahhs_nelsonaalen$H0 <- H0_sahhs
-df_sahhs$H0             <- H0_sahhs
+H0_sahhs                <- nelsonaalen_with_SE(df_sahhs_nelsonaalen, time, status)
+df_sahhs_nelsonaalen$H0 <- H0_sahhs$nelsonaalen_estimates
+df_sahhs_nelsonaalen$se <- H0_sahhs$nelsonaalen_se
+df_sahhs$H0             <- H0_sahhs$nelsonaalen_estimates
 
 
 # Applying multiple imputation to BMI and smoking covariates for outcome ---
