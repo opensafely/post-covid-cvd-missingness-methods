@@ -179,10 +179,94 @@ all_var_names <- c(
 
   "cov_num_age",
   "cov_cat_sex",
-  # "cov_num_bmi", # excluded
+  "cov_num_bmi",
   "cov_cat_ethnicity",
   "cov_cat_imd",
-  # "cov_cat_smoking", # excluded
+  "cov_cat_smoking",
+
+  "cov_bin_carehome",
+  "cov_bin_hcworker",
+  "cov_bin_dementia",
+  "cov_bin_liver_disease",
+  "cov_bin_ckd",
+
+  "cov_bin_cancer",
+  "cov_bin_hypertension",
+  "cov_bin_diabetes",
+  "cov_bin_obesity",
+  "cov_bin_copd",
+
+  "cov_bin_depression",
+  "cov_bin_stroke_all",
+  "cov_bin_other_ae",
+  "cov_bin_vte",
+  "cov_bin_hf",
+
+  "cov_bin_angina",
+  "cov_bin_lipidmed",
+  "cov_bin_antiplatelet",
+  "cov_bin_anticoagulant",
+  "cov_bin_cocp",
+
+  "cov_bin_hrt",
+  "strat_cat_region",
+  "vax_cat_jcvi_group"
+  # "cens_status" # excluded
+)
+
+all_var_names_except_bmi <- c(
+  "cov_bin_ami",
+  "cov_bin_sahhs",
+  "cov_bin_covid",
+
+  "cov_num_age",
+  "cov_cat_sex",
+  # "cov_num_bmi",
+  "cov_cat_ethnicity",
+  "cov_cat_imd",
+  "cov_cat_smoking",
+
+  "cov_bin_carehome",
+  "cov_bin_hcworker",
+  "cov_bin_dementia",
+  "cov_bin_liver_disease",
+  "cov_bin_ckd",
+
+  "cov_bin_cancer",
+  "cov_bin_hypertension",
+  "cov_bin_diabetes",
+  "cov_bin_obesity",
+  "cov_bin_copd",
+
+  "cov_bin_depression",
+  "cov_bin_stroke_all",
+  "cov_bin_other_ae",
+  "cov_bin_vte",
+  "cov_bin_hf",
+
+  "cov_bin_angina",
+  "cov_bin_lipidmed",
+  "cov_bin_antiplatelet",
+  "cov_bin_anticoagulant",
+  "cov_bin_cocp",
+
+  "cov_bin_hrt",
+  "strat_cat_region",
+  "vax_cat_jcvi_group"
+  # "cens_status" # excluded
+)
+
+all_var_names_except_smoking <- c(
+  "cov_bin_ami",
+  "cov_bin_sahhs",
+  "cov_bin_covid",
+
+  "cov_num_age",
+  "cov_cat_sex",
+  "cov_num_bmi",
+  "cov_cat_ethnicity",
+  "cov_cat_imd",
+  # "cov_cat_smoking",
 
   "cov_bin_carehome",
   "cov_bin_hcworker",
@@ -215,8 +299,8 @@ all_var_names <- c(
 )
 
 my_formulas <- list(
-  cov_cat_smoking = as.formula(paste0("cov_cat_smoking ~ ", paste(all_var_names, collapse = " + "), " + H0")),
-  cov_num_bmi     = as.formula(paste0("cov_num_bmi ~ ",     paste(all_var_names, collapse = " + "), " + H0"))
+  cov_cat_smoking = as.formula(paste0("cov_cat_smoking ~ ", paste(all_var_names_except_smoking, collapse = " + "), " + H0")),
+  cov_num_bmi     = as.formula(paste0("cov_num_bmi ~ ",     paste(all_var_names_except_bmi, collapse = " + "), " + H0"))
 )
 
 # Calculate Nelson-Aalen Estimator for outcome -----------
