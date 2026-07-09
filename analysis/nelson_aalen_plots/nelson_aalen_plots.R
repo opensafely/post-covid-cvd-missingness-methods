@@ -56,15 +56,6 @@ df_ami_nelsonaalen   <- readRDS(paste0("output/dataset_clean/nelson_aalen_", coh
 df_sahhs_nelsonaalen <- readRDS(paste0("output/dataset_clean/nelson_aalen_", cohort, "_sahhs.rds"))
 
 
-# Sort
-# df_ami_nelsonaalen   <- df_ami_nelsonaalen[order(df_ami_nelsonaalen$time, df_ami_nelsonaalen$H0), ]
-# df_sahhs_nelsonaalen <- df_sahhs_nelsonaalen[order(df_sahhs_nelsonaalen$time, df_sahhs_nelsonaalen$H0), ]
-
-# print(head(df_ami_nelsonaalen, n = 30))
-
-# stop("?")
-
-
 # Take random 100-point sample -------------------------------------------------
 print("Take random 100-point sample")
 
