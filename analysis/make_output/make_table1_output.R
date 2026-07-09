@@ -213,6 +213,35 @@ if (output == "table1") {
 }
 
 
+# Nelson-Aalen estimates -------------------------------------------------------
+print("Nelson-Aalen estimates")
+
+# ami estimate
+df_ami_nelsonaalen      <- readRDS(paste0("output/dataset_clean/nelson_aalen_prevax_ami.rds"))
+nelsonaalen_ami_summary <- summary(df_ami_nelsonaalen$H0)
+
+nelson_aalen_mean_ami_row   <- which(df_ami$Characteristic == "Nelson-Aalen Estimator (H0)" & df_ami$Subcharacteristic == "Mean")
+nelson_aalen_median_ami_row <- which(df_ami$Characteristic == "Nelson-Aalen Estimator (H0)" & df_ami$Subcharacteristic == "Median")
+nelson_aalen_IQR_ami_row    <- which(df_ami$Characteristic == "Nelson-Aalen Estimator (H0)" & df_ami$Subcharacteristic == "IQR")
+
+df_ami[nelson_aalen_mean_ami_row, "N [midpoint6_derived]_prevax" ]   <- as.character(nelsonaalen_ami_summary[["Mean"]])
+df_ami[nelson_aalen_median_ami_row, "N [midpoint6_derived]_prevax" ] <- as.character(nelsonaalen_ami_summary[["Median"]])
+df_ami[nelson_aalen_IQR_ami_row, "N [midpoint6_derived]_prevax" ]    <- as.character((nelsonaalen_ami_summary[["3rd Qu."]] - nelsonaalen_ami_summary[["1st Qu."]]))
+
+
+# sahhs estimate
+df_sahhs_nelsonaalen      <- readRDS(paste0("output/dataset_clean/nelson_aalen_prevax_sahhs.rds"))
+nelsonaalen_sahhs_summary <- summary(df_sahhs_nelsonaalen$H0)
+
+nelson_aalen_mean_sahhs_row   <- which(df_sahhs$Characteristic == "Nelson-Aalen Estimator (H0)" & df_sahhs$Subcharacteristic == "Mean")
+nelson_aalen_median_sahhs_row <- which(df_sahhs$Characteristic == "Nelson-Aalen Estimator (H0)" & df_sahhs$Subcharacteristic == "Median")
+nelson_aalen_IQR_sahhs_row    <- which(df_sahhs$Characteristic == "Nelson-Aalen Estimator (H0)" & df_sahhs$Subcharacteristic == "IQR")
+
+df_sahhs[nelson_aalen_mean_sahhs_row, "N [midpoint6_derived]_prevax" ]   <- as.character(nelsonaalen_sahhs_summary[["Mean"]])
+df_sahhs[nelson_aalen_median_sahhs_row, "N [midpoint6_derived]_prevax" ] <- as.character(nelsonaalen_sahhs_summary[["Median"]])
+df_sahhs[nelson_aalen_IQR_sahhs_row, "N [midpoint6_derived]_prevax" ]    <- as.character((nelsonaalen_sahhs_summary[["3rd Qu."]] - nelsonaalen_sahhs_summary[["1st Qu."]]))
+
+
 # Save output ------------------------------------------------------------------
 print('Save output')
 

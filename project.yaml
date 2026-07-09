@@ -80,19 +80,6 @@ actions:
         nelsonaalen_ami: output/dataset_clean/nelson_aalen_prevax_ami.rds
         nelsonaalen_sahhs: output/dataset_clean/nelson_aalen_prevax_sahhs.rds
 
-  ## nelson_aalen_plots_cohort_prevax 
-
-  nelson_aalen_plots_cohort_prevax:
-    run: r:latest analysis/nelson_aalen_plots/nelson_aalen_plots.R prevax
-    needs:
-    - apply_across_MI_cohort_prevax
-    outputs:
-      highly_sensitive:
-        nelsonaalen_plot_ami: output/dataset_clean/nelson_aalen_prevax_ami.png
-        nelsonaalen_plot_ami_ggplot: output/dataset_clean/nelson_aalen_prevax_ami_ggplot.png
-        nelsonaalen_plot_sahhs: output/dataset_clean/nelson_aalen_prevax_sahhs.png
-        nelsonaalen_plot_sahhs_ggplot: output/dataset_clean/nelson_aalen_prevax_sahhs_ggplot.png
-
   ## generate_subsample_cohort_prevax 
 
   generate_subsample_cohort_prevax:
@@ -187,6 +174,7 @@ actions:
   make-table1-output:
     run: r:v2 analysis/make_output/make_table1_output.R table1 prevax
     needs:
+    - apply_across_MI_cohort_prevax
     - table1-cohort_prevax
     outputs:
       moderately_sensitive:
@@ -198,6 +186,7 @@ actions:
   table1-cohort_prevax_subsample:
     run: 'r:v2 analysis/table1/table1_subsample.R prevax 18;30;40;50;60;70;80;90 '
     needs:
+    - apply_across_MI_cohort_prevax
     - generate_subsample_cohort_prevax
     outputs:
       moderately_sensitive:

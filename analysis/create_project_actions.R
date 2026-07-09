@@ -357,7 +357,10 @@ table1_subsample <- function(cohort, ages = "18;40;60;80", preex = "All") {
       name = glue("table1-cohort_{cohort}{preex_str}_subsample"),
       run = "r:v2 analysis/table1/table1_subsample.R",
       arguments = c(c(cohort), c(ages), c(preex)),
-      needs = list(glue("generate_subsample_cohort_{cohort}")),
+      needs = list(
+        glue("apply_across_MI_cohort_{cohort}"),
+        glue("generate_subsample_cohort_{cohort}")
+      ),
       moderately_sensitive = list(
         table1_ami_subsample = glue(
           "output/table1/table1-cohort_{cohort}{preex_str}_ami_subsample.csv"
@@ -1037,12 +1040,17 @@ make_table1_output <- function(action_name, cohort, subgroup = "") {
           x[x != ""]
         }
       )),
-      needs = c(as.list(paste0(
-        action_name,
-        "-cohort_",
-        cohort_names,
-        sub_str
-      ))),
+      needs = c(
+        glue("apply_across_MI_cohort_prevax"),
+        as.list(
+          paste0(
+            action_name,
+            "-cohort_",
+            cohort_names,
+            sub_str
+          )
+        )
+      ),
       moderately_sensitive = list(
         other_output_ami_midpoint6 = glue(
           "output/make_output/{action_name}{sub_str}_output_ami_midpoint6.csv"
@@ -1171,14 +1179,14 @@ actions_list <- splice(
     )
   ),
 
-  ## Apply across multiple imputation ------------------------------------------
+  ## Make Nelson-Aalen plots ---------------------------------------------------
   
-  splice(
-    unlist(
-      lapply(cohorts, function(x) nelson_aalen_plots(cohort = x)),
-      recursive = FALSE
-    )
-  ),
+  # splice(
+  #   unlist(
+  #     lapply(cohorts, function(x) nelson_aalen_plots(cohort = x)),
+  #     recursive = FALSE
+  #   )
+  # ),
 
   ## Generate 10% subsample study population ----------------------------------
 

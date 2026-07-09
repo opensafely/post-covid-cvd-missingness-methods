@@ -94,6 +94,10 @@ df_sahhs <- readr::read_rds(paste0(
   "_clean_sahhs.rds"
 ))
 
+# nelson aalen estimator
+df_ami_nelsonaalen   <- readRDS(paste0("output/dataset_clean/nelson_aalen_", cohort, "_ami.rds"))
+df_sahhs_nelsonaalen <- readRDS(paste0("output/dataset_clean/nelson_aalen_", cohort, "_sahhs.rds"))
+
 
 # Check all covariates  --------------------------------------------------------
 message("Check all covariates")
@@ -347,7 +351,22 @@ df_sahhs <- df_sahhs[order(df_sahhs$characteristic, df_sahhs$subcharacteristic),
 print('Add median (IQR) age')
 
 # Pastes: "Mean Age (LQ Age - UQ Age)" as a string for each cohort
+df_ami[nrow(df_ami) + 1, ]    <- c("Age, years", "Median (IQR)",  median_iqr_age, 0)
 df_sahhs[nrow(df_sahhs) + 1, ] <- c("Age, years", "Median (IQR)", median_iqr_age, 0)
+
+
+# Nelson-Aalen summary statistics ---------------------------------------------
+print("Nelson-Aalen summary statistics")
+
+nelsonaalen_ami_summary <- summary(df_ami_nelsonaalen$H0)
+df_ami[nrow(df_ami) + 1,] <- c("Nelson-Aalen Estimator (H0)", "Mean",   nelsonaalen_ami_summary[["Mean"]], 0)
+df_ami[nrow(df_ami) + 1,] <- c("Nelson-Aalen Estimator (H0)", "Median", nelsonaalen_ami_summary[["Median"]], 0)
+df_ami[nrow(df_ami) + 1,] <- c("Nelson-Aalen Estimator (H0)", "IQR",    (nelsonaalen_ami_summary[["3rd Qu."]] - nelsonaalen_ami_summary[["1st Qu."]]), 0)
+
+nelsonaalen_sahhs_summary <- summary(df_sahhs_nelsonaalen$H0)
+df_sahhs[nrow(df_sahhs) + 1,] <- c("Nelson-Aalen Estimator (H0)", "Mean",   nelsonaalen_sahhs_summary[["Mean"]], 0)
+df_sahhs[nrow(df_sahhs) + 1,] <- c("Nelson-Aalen Estimator (H0)", "Median", nelsonaalen_sahhs_summary[["Median"]], 0)
+df_sahhs[nrow(df_sahhs) + 1,] <- c("Nelson-Aalen Estimator (H0)", "IQR",    (nelsonaalen_sahhs_summary[["3rd Qu."]] - nelsonaalen_sahhs_summary[["1st Qu."]]), 0)
 
 
 # Save Table 1 -----------------------------------------------------------------
