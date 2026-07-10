@@ -78,11 +78,21 @@ preex_string <- ""
 # Load subsample data ----------------------------------------------------------
 print("Load subsample data")
 
-df <- readr::read_rds(paste0(
-  "output/generate_subsample/input_",
-  cohort,
-  "_clean_subsample.rds"
-))
+if (grepl("ami", name)) {
+  # subsample
+  df <- readr::read_rds(paste0(
+    "output/generate_subsample/input_",
+    cohort,
+    "_clean_subsample_ami.rds"
+  ))
+} else {
+  # subsample
+  df <- readr::read_rds(paste0(
+    "output/generate_subsample/input_",
+    cohort,
+    "_clean_subsample_sahhs.rds"
+  ))
+}
 
 
 # Data preparation for fully adjusted logistic model ---------------------
@@ -93,6 +103,7 @@ df2 <- (df %>% select(c(
 
   cov_num_age,
   cov_cat_sex,
+  cov_num_bmi,
   cov_cat_ethnicity,
   cov_cat_imd,
   cov_cat_smoking,
@@ -125,6 +136,9 @@ df2 <- (df %>% select(c(
   strat_cat_region
 )))
 
+# prevent conversion to factor
+df2$cov_num_bmi <- as.numeric(df2$cov_num_bmi)
+
 
 # Data preparation for the lasso_X logistic model ------------------------------
 message("Data preparation for the lasso_X logistic model")
@@ -134,6 +148,7 @@ message("Data preparation for the lasso_X logistic model")
 lasso_X_conf_matrix <- (df %>% select(c(
   cov_num_age,
   cov_cat_sex,
+  cov_num_bmi,
   cov_cat_ethnicity,
   cov_cat_imd,
   cov_cat_smoking,
@@ -166,6 +181,9 @@ lasso_X_conf_matrix <- (df %>% select(c(
   strat_cat_region
 )))
 
+# prevent conversion to factor
+lasso_X_conf_matrix$cov_num_bmi <- as.numeric(lasso_X_conf_matrix$cov_num_bmi)
+
 lasso_X_conf_matrix_preserving_factors <- model.matrix(
    ~ ., # formula meaning take all terms
   data = lasso_X_conf_matrix
@@ -188,6 +206,7 @@ cv_lasso_X_model <- cv.glmnet(x      = lasso_X_conf_matrix_preserving_factors,
                               y      = lasso_X_exposure_matrix_preserving_factors,
                               nfolds = 20,         # number of cv datasets
                               family = "binomial", # logistic regression
+                              weights = generate_weights(sample_size = nrow(df)),
                               alpha  = 1)          # LASSO penalty
 
 # tune regularisation parameter lambda to minimise cross-validated error (cvm)
@@ -196,6 +215,7 @@ lambda         <- cv_lasso_X_model$lambda.min
 lasso_X_model    <- glmnet(x      = lasso_X_conf_matrix_preserving_factors,
                            y      = lasso_X_exposure_matrix_preserving_factors,
                            family = "binomial", # logistic regression
+                           weights = generate_weights(sample_size = nrow(df)),
                            alpha  = 1,          # LASSO penalty
                            lambda = lambda)     # optimal lambda
 
@@ -208,7 +228,8 @@ fully_adjusted_formula <- "cov_bin_covid ~ ."
 fully_adjusted_logistic <- glm(
   fully_adjusted_formula,
   family = "binomial",
-  data = df2
+  data = df2,
+  weights = generate_weights(sample_size = nrow(df2))
 )
 
 
@@ -241,7 +262,7 @@ write.csv(
 write.csv(
   lasso_X_coefs,
   paste0(lasso_X_var_selection_dir, "lasso_X_var_selection-coefs-", name, preex_string, ".csv"),
-  row.names = FALSE
+  row.names = TRUE
 )
 
 write.csv(

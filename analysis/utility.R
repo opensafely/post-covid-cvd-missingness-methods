@@ -138,22 +138,49 @@ make_outcome_formula <- function(vars_selected = NULL, outcome = NULL) {
 }
 
 
-convert_terms_to_vars <- function(terms = NULL, all_var_names = NULL) {
+convert_terms_to_vars <- function(terms = NULL) {
+  all_var_names <- c(
+    "cov_bin_covid",
+    "cov_num_age", "cov_cat_sex", "cov_num_bmi", "cov_cat_ethnicity", "cov_cat_imd",
+    "cov_cat_smoking", "cov_bin_carehome", "cov_bin_hcworker", "cov_bin_dementia",
+    "cov_bin_liver_disease", "cov_bin_ckd", "cov_bin_cancer", "cov_bin_hypertension",
+    "cov_bin_diabetes", "cov_bin_obesity", "cov_bin_copd", "cov_bin_depression", "cov_bin_stroke_all",
+    "cov_bin_other_ae", "cov_bin_vte", "cov_bin_hf", "cov_bin_angina", "cov_bin_lipidmed",
+    "cov_bin_antiplatelet", "cov_bin_anticoagulant", "cov_bin_cocp", "cov_bin_hrt", "strat_cat_region"
+  )
+
   vars <- c()
 
   for (term in terms) {
-    # split by capital letter, extract first term
-    # covariate names always all lower case
-    # Factor Level Names always begin with upper case
-    new_term <- sapply(strsplit(x = term, split = '([[:upper:]])'), `[`, 1)
-    vars     <- c(vars, new_term)
+    for (name in all_var_names) {
+      if (stringr::str_detect(term, name)) {
+        vars <- append(vars, name)
+      }
+    }
   }
 
   # remove duplicates (i.e. two levels are significant)
   vars <- unique(vars)
 
-  # remove any trailing . (leftover from levels)
-  vars <- gsub('.', '', vars)
-
   return (vars)
+}
+
+
+generate_weights <- function(initial_weights = NULL, sample_size = NULL, num_imps = NULL) {
+  if (is.null(num_imps)) {
+    num_imps <- get_number_of_imputed_datasets()
+  }
+
+  if (is.null(initial_weights)) {
+    weights <- rep((1 / num_imps), length.out = sample_size)
+  } else {
+    weights <- ((1 / num_imps) * initial_weights)
+  }
+
+  return (weights)
+}
+
+
+get_number_of_imputed_datasets <- function() {
+  return (10)
 }

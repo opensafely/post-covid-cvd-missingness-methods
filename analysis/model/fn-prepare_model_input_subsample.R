@@ -16,12 +16,21 @@ prepare_model_input_subsample <- function(name) {
   # Load subsample data ---------------------------------------------------------
   print(paste0("Load subsample data for ", active_analyses$name))
 
-  # subsample in place of study population
-  input <- readr::read_rds(paste0(
-    "output/generate_subsample/input_",
-    active_analyses$cohort,
-    "_clean_subsample.rds"
-  ))
+  if (grepl("ami", name)) {
+    # subsample
+    input <- readr::read_rds(paste0(
+      "output/generate_subsample/input_",
+      active_analyses$cohort,
+      "_clean_subsample_ami.rds"
+    ))
+  } else {
+    # subsample
+    input <- readr::read_rds(paste0(
+      "output/generate_subsample/input_",
+      active_analyses$cohort,
+      "_clean_subsample_sahhs.rds"
+    ))
+  }
 
   # Restrict to required variables for dataset preparation ---------------------
   print("Restrict to required variables for dataset preparation")
@@ -36,6 +45,7 @@ prepare_model_input_subsample <- function(name) {
     active_analyses$strata,
     active_analyses$covariate_age,
     "cov_cat_sex",
+    "cov_num_bmi",
     "cov_cat_ethnicity",
     "cov_cat_smoking",
     "cov_bin_covid",
@@ -115,7 +125,7 @@ prepare_model_input_subsample <- function(name) {
     ) %>%
     dplyr::ungroup()
 
-  keep <- c(keep, "cov_bin_covid", "cov_bin_sahhs")
+  keep <- c(keep, "cov_num_bmi", "cov_bin_covid", "cov_bin_sahhs")
 
   return(list(input = input, keep = keep))
 }

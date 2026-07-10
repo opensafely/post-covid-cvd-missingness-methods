@@ -56,25 +56,40 @@ actions:
         venn: output/dataset_clean/venn-cohort_prevax.rds
         cohort_clean: output/dataset_clean/input_prevax_clean_prehoc.rds
 
-  ## post_hoc_vars_cohort_prevax 
+  ## table_missingness_cohort_prevax 
 
-  post_hoc_vars_cohort_prevax:
-    run: r:latest analysis/post_hoc_vars/post_hoc_vars.R prevax
+  table_missingness_cohort_prevax:
+    run: r:latest analysis/table_missingness/table_missingness.R prevax
+    needs:
+    - generate_input_prevax_clean
+    - generate_input_prevax
+    outputs:
+      moderately_sensitive:
+        table_missingness: output/table_missingness/table_missingness_cohort_prevax.csv
+
+  ## apply_across_MI_cohort_prevax 
+
+  apply_across_MI_cohort_prevax:
+    run: r:latest analysis/apply_across_MI/apply_across_MI.R prevax
     needs:
     - generate_input_prevax_clean
     outputs:
       highly_sensitive:
-        cohort_clean: output/dataset_clean/input_prevax_clean.rds
+        cohort_clean_ami: output/dataset_clean/input_prevax_clean_ami.rds
+        cohort_clean_sahhs: output/dataset_clean/input_prevax_clean_sahhs.rds
+        nelsonaalen_ami: output/dataset_clean/nelson_aalen_prevax_ami.rds
+        nelsonaalen_sahhs: output/dataset_clean/nelson_aalen_prevax_sahhs.rds
 
   ## generate_subsample_cohort_prevax 
 
   generate_subsample_cohort_prevax:
     run: r:latest analysis/generate_subsample/generate_subsample.R prevax
     needs:
-    - post_hoc_vars_cohort_prevax
+    - apply_across_MI_cohort_prevax
     outputs:
       highly_sensitive:
-        cohort_clean_subsample: output/generate_subsample/input_prevax_clean_subsample.rds
+        cohort_clean_subsample_ami: output/generate_subsample/input_prevax_clean_subsample_ami.rds
+        cohort_clean_subsample_sahhs: output/generate_subsample/input_prevax_clean_subsample_sahhs.rds
 
   ## Generate cox model input data for 10% subsample study population 
   ## make_model_input_subsample-cohort_prevax-main-ami 
@@ -146,32 +161,39 @@ actions:
   table1-cohort_prevax:
     run: 'r:v2 analysis/table1/table1.R prevax 18;30;40;50;60;70;80;90 '
     needs:
-    - post_hoc_vars_cohort_prevax
+    - apply_across_MI_cohort_prevax
     outputs:
       moderately_sensitive:
-        table1: output/table1/table1-cohort_prevax.csv
-        table1_midpoint6: output/table1/table1-cohort_prevax-midpoint6.csv
+        table1_ami: output/table1/table1-cohort_prevax_ami.csv
+        table1_ami_midpoint6: output/table1/table1-cohort_prevax_ami-midpoint6.csv
+        table1_sahhs: output/table1/table1-cohort_prevax_sahhs.csv
+        table1_sahhs_midpoint6: output/table1/table1-cohort_prevax_sahhs-midpoint6.csv
 
   ## Generate make-table1-output 
 
   make-table1-output:
-    run: r:v2 analysis/make_output/make_other_output.R table1 prevax
+    run: r:v2 analysis/make_output/make_table1_output.R table1 prevax
     needs:
+    - apply_across_MI_cohort_prevax
     - table1-cohort_prevax
     outputs:
       moderately_sensitive:
-        other_output_midpoint6: output/make_output/table1_output_midpoint6.csv
+        other_output_ami_midpoint6: output/make_output/table1_output_ami_midpoint6.csv
+        other_output_sahhs_midpoint6: output/make_output/table1_output_sahhs_midpoint6.csv
 
   ## Generate table1_cohort_prevax_subsample 
 
   table1-cohort_prevax_subsample:
     run: 'r:v2 analysis/table1/table1_subsample.R prevax 18;30;40;50;60;70;80;90 '
     needs:
+    - apply_across_MI_cohort_prevax
     - generate_subsample_cohort_prevax
     outputs:
       moderately_sensitive:
-        table1_subsample: output/table1/table1-cohort_prevax_subsample.csv
-        table1_midpoint6_subsample: output/table1/table1-cohort_prevax-midpoint6_subsample.csv
+        table1_ami_subsample: output/table1/table1-cohort_prevax_ami_subsample.csv
+        table1_ami_midpoint6_subsample: output/table1/table1-cohort_prevax_ami-midpoint6_subsample.csv
+        table1_sahhs_subsample: output/table1/table1-cohort_prevax_sahhs_subsample.csv
+        table1_sahhs_midpoint6_subsample: output/table1/table1-cohort_prevax_sahhs-midpoint6_subsample.csv
 
   ## Generate lasso_var_selection-cohort_prevax-main-ami 
 
@@ -530,14 +552,14 @@ actions:
   make_model_input-cohort_prevax-main-ami:
     run: r:latest analysis/model/make_model_input.R cohort_prevax-main-ami
     needs:
-    - post_hoc_vars_cohort_prevax
+    - apply_across_MI_cohort_prevax
     outputs:
       highly_sensitive:
         model_input: output/model/model_input-cohort_prevax-main-ami.rds
 
   cox_ipw-cohort_prevax-main-ami:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-main-ami.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -568,14 +590,14 @@ actions:
   make_model_input-cohort_prevax-main-stroke_sahhs:
     run: r:latest analysis/model/make_model_input.R cohort_prevax-main-stroke_sahhs
     needs:
-    - post_hoc_vars_cohort_prevax
+    - apply_across_MI_cohort_prevax
     outputs:
       highly_sensitive:
         model_input: output/model/model_input-cohort_prevax-main-stroke_sahhs.rds
 
   cox_ipw-cohort_prevax-main-stroke_sahhs:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-main-stroke_sahhs.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -606,14 +628,14 @@ actions:
   make_model_input-cohort_prevax-sub_covidhospital_FALSE-ami:
     run: r:latest analysis/model/make_model_input.R cohort_prevax-sub_covidhospital_FALSE-ami
     needs:
-    - post_hoc_vars_cohort_prevax
+    - apply_across_MI_cohort_prevax
     outputs:
       highly_sensitive:
         model_input: output/model/model_input-cohort_prevax-sub_covidhospital_FALSE-ami.rds
 
   cox_ipw-cohort_prevax-sub_covidhospital_FALSE-ami:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-sub_covidhospital_FALSE-ami.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -644,14 +666,14 @@ actions:
   make_model_input-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs:
     run: r:latest analysis/model/make_model_input.R cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs
     needs:
-    - post_hoc_vars_cohort_prevax
+    - apply_across_MI_cohort_prevax
     outputs:
       highly_sensitive:
         model_input: output/model/model_input-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs.rds
 
   cox_ipw-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -682,14 +704,14 @@ actions:
   make_model_input-cohort_prevax-sub_covidhospital_TRUE-ami:
     run: r:latest analysis/model/make_model_input.R cohort_prevax-sub_covidhospital_TRUE-ami
     needs:
-    - post_hoc_vars_cohort_prevax
+    - apply_across_MI_cohort_prevax
     outputs:
       highly_sensitive:
         model_input: output/model/model_input-cohort_prevax-sub_covidhospital_TRUE-ami.rds
 
   cox_ipw-cohort_prevax-sub_covidhospital_TRUE-ami:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-sub_covidhospital_TRUE-ami.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -720,14 +742,14 @@ actions:
   make_model_input-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs:
     run: r:latest analysis/model/make_model_input.R cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs
     needs:
-    - post_hoc_vars_cohort_prevax
+    - apply_across_MI_cohort_prevax
     outputs:
       highly_sensitive:
         model_input: output/model/model_input-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs.rds
 
   cox_ipw-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -851,7 +873,7 @@ actions:
 
   lasso_cox_ipw-cohort_prevax-main-ami:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-main-ami.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -882,7 +904,7 @@ actions:
 
   lasso_cox_ipw-cohort_prevax-main-stroke_sahhs:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-main-stroke_sahhs.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -913,7 +935,7 @@ actions:
 
   lasso_cox_ipw-cohort_prevax-sub_covidhospital_FALSE-ami:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-sub_covidhospital_FALSE-ami.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -944,7 +966,7 @@ actions:
 
   lasso_cox_ipw-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -975,7 +997,7 @@ actions:
 
   lasso_cox_ipw-cohort_prevax-sub_covidhospital_TRUE-ami:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-sub_covidhospital_TRUE-ami.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -1006,7 +1028,7 @@ actions:
 
   lasso_cox_ipw-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -1039,7 +1061,7 @@ actions:
 
   lasso_X_cox_ipw-cohort_prevax-main-ami:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-main-ami.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -1070,7 +1092,7 @@ actions:
 
   lasso_X_cox_ipw-cohort_prevax-main-stroke_sahhs:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-main-stroke_sahhs.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -1101,7 +1123,7 @@ actions:
 
   lasso_X_cox_ipw-cohort_prevax-sub_covidhospital_FALSE-ami:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-sub_covidhospital_FALSE-ami.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -1132,7 +1154,7 @@ actions:
 
   lasso_X_cox_ipw-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -1163,7 +1185,7 @@ actions:
 
   lasso_X_cox_ipw-cohort_prevax-sub_covidhospital_TRUE-ami:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-sub_covidhospital_TRUE-ami.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -1194,7 +1216,7 @@ actions:
 
   lasso_X_cox_ipw-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -1227,7 +1249,7 @@ actions:
 
   lasso_union_cox_ipw-cohort_prevax-main-ami:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-main-ami.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -1258,7 +1280,7 @@ actions:
 
   lasso_union_cox_ipw-cohort_prevax-main-stroke_sahhs:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-main-stroke_sahhs.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -1289,7 +1311,7 @@ actions:
 
   lasso_union_cox_ipw-cohort_prevax-sub_covidhospital_FALSE-ami:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-sub_covidhospital_FALSE-ami.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -1320,7 +1342,7 @@ actions:
 
   lasso_union_cox_ipw-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-sub_covidhospital_FALSE-stroke_sahhs.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -1351,7 +1373,7 @@ actions:
 
   lasso_union_cox_ipw-cohort_prevax-sub_covidhospital_TRUE-ami:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-sub_covidhospital_TRUE-ami.rds
       --ipw=TRUE
       --exposure=exp_date
@@ -1382,7 +1404,7 @@ actions:
 
   lasso_union_cox_ipw-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs:
     run: |-
-      cox-ipw:v0.0.39
+      r:v2 analysis/cox_ipw/cox-ipw.R
       --df_input=model/model_input-cohort_prevax-sub_covidhospital_TRUE-stroke_sahhs.rds
       --ipw=TRUE
       --exposure=exp_date

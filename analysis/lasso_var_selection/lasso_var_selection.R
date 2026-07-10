@@ -86,12 +86,21 @@ preex_string <- ""
 # Load subsample data ----------------------------------------------------------
 print("Load subsample data")
 
-# subsample
-df <- readr::read_rds(paste0(
-  "output/generate_subsample/input_",
-  cohort,
-  "_clean_subsample.rds"
-))
+if (grepl("ami", name)) {
+  # subsample
+  df <- readr::read_rds(paste0(
+    "output/generate_subsample/input_",
+    cohort,
+    "_clean_subsample_ami.rds"
+  ))
+} else {
+  # subsample
+  df <- readr::read_rds(paste0(
+    "output/generate_subsample/input_",
+    cohort,
+    "_clean_subsample_sahhs.rds"
+  ))
+}
 
 # subsample
 model_input_df <- readr::read_rds(paste0(
@@ -114,6 +123,7 @@ df2 <- (model_input_df %>% select(c(
 
   cov_num_age,
   cov_cat_sex,
+  cov_num_bmi,
   cov_cat_ethnicity,
   cov_cat_imd,
   cov_cat_smoking,
@@ -146,6 +156,9 @@ df2 <- (model_input_df %>% select(c(
   strat_cat_region
 )))
 
+# prevent conversion to factor
+df2$cov_num_bmi <- as.numeric(df2$cov_num_bmi)
+
 
 # Data preparation for lasso cox model ----------------------------------
 message("Data preparation for lasso cox model")
@@ -155,6 +168,7 @@ lasso_cox_conf_matrix <- (model_input_df %>% select(c(
 
   cov_num_age,
   cov_cat_sex,
+  cov_num_bmi,
   cov_cat_ethnicity,
   cov_cat_imd,
   cov_cat_smoking,
@@ -186,6 +200,9 @@ lasso_cox_conf_matrix <- (model_input_df %>% select(c(
   cov_bin_hrt,
   strat_cat_region
 )))
+
+# prevent conversion to factor
+lasso_cox_conf_matrix$cov_num_bmi <- as.numeric(lasso_cox_conf_matrix$cov_num_bmi)
 
 lasso_cox_conf_matrix_preserving_factors <- model.matrix(
    ~ ., # formula meaning take all terms
@@ -219,11 +236,12 @@ lasso_cox_outcome_survival <- Surv(time  = as.numeric(outcome_cox_dates),
 # Fitting the lasso cox model ----------------------------------------------------
 message("Fitting the lasso cox model")
 
-cv_lasso_cox_model <- cv.glmnet(x      = lasso_cox_conf_matrix_preserving_factors,
-                                y      = lasso_cox_outcome_survival,
-                                nfolds = 20,         # number of cv datasets
-                                family = "cox",      # cox regression
-                                alpha  = 1)          # LASSO penalty
+cv_lasso_cox_model <- cv.glmnet(x       = lasso_cox_conf_matrix_preserving_factors,
+                                y       = lasso_cox_outcome_survival,
+                                nfolds  = 20,         # number of cv datasets
+                                family  = "cox",      # cox regression
+                                weights = generate_weights(sample_size = nrow(model_input_df)),
+                                alpha   = 1)          # LASSO penalty
 
 # tune regularisation parameter lambda to minimise cross-validated error (cvm)
 lambda         <- cv_lasso_cox_model$lambda.min
@@ -231,6 +249,7 @@ lambda         <- cv_lasso_cox_model$lambda.min
 lasso_cox_model    <- glmnet(x = lasso_cox_conf_matrix_preserving_factors,
                              y = lasso_cox_outcome_survival,
                              family = "cox",      # cox regression
+                             weights = generate_weights(sample_size = nrow(model_input_df)),
                              alpha  = 1,          # LASSO penalty
                              lambda = lambda)     # optimal lambda
 
@@ -258,7 +277,8 @@ fully_adjusted_outcome_regression_formula <- make_outcome_formula(
 
 fully_adjusted_cox  <- coxph(
   formula = as.formula(fully_adjusted_outcome_regression_formula),
-  data    = df2
+  data    = df2,
+  weights = generate_weights(sample_size = nrow(model_input_df))
 )
 
 

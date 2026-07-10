@@ -16,11 +16,19 @@ prepare_model_input <- function(name) {
   # Load data ------------------------------------------------------------------
   print(paste0("Load data for ", active_analyses$name))
 
-  input <- readr::read_rds(paste0(
-    "output/dataset_clean/input_",
-    active_analyses$cohort,
-    "_clean.rds"
-  ))
+  if (grepl("ami", name)) {
+    input <- readr::read_rds(paste0(
+      "output/dataset_clean/input_",
+      active_analyses$cohort,
+      "_clean_ami.rds"
+    ))
+  } else {
+    input <- readr::read_rds(paste0(
+      "output/dataset_clean/input_",
+      active_analyses$cohort,
+      "_clean_sahhs.rds"
+    ))
+  }
 
   # Restrict to required variables for dataset preparation ---------------------
   print("Restrict to required variables for dataset preparation")
@@ -35,6 +43,7 @@ prepare_model_input <- function(name) {
     active_analyses$strata,
     active_analyses$covariate_age,
     "cov_cat_sex",
+    "cov_num_bmi",
     "cov_cat_ethnicity",
     "cov_cat_smoking",
     "cov_bin_covid",
@@ -114,7 +123,7 @@ prepare_model_input <- function(name) {
     ) %>%
     dplyr::ungroup()
 
-  keep <- c(keep, "cov_bin_covid", "cov_bin_sahhs")
+  keep <- c(keep, "cov_num_bmi", "cov_bin_covid", "cov_bin_sahhs")
 
   return(list(input = input, keep = keep))
 }

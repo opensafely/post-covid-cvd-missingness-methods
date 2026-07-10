@@ -184,21 +184,69 @@ clean_data <- function(cohort, describe = describe) {
 }
 
 
-# Create function to define post-hoc variables for clean data -------------------
-post_hoc_vars <- function(cohort) {
+# Create function to make missingness table ---------------------------
+table_missingness <- function(cohort) {
   splice(
-    comment(glue("post_hoc_vars_cohort_{cohort}")),
+    comment(glue("table_missingness_cohort_{cohort}")),
     action(
-      name = glue("post_hoc_vars_cohort_{cohort}"),
+      name = glue("table_missingness_cohort_{cohort}"),
       run = glue(
-        "r:latest analysis/post_hoc_vars/post_hoc_vars.R"
+        "r:latest analysis/table_missingness/table_missingness.R"
+      ),
+      arguments = c(c(cohort)),
+      needs = list(
+        glue("generate_input_{cohort}_clean"),
+        glue("generate_input_{cohort}")
+      ),
+      moderately_sensitive = list(
+        table_missingness  = glue("output/table_missingness/table_missingness_cohort_{cohort}.csv")
+      )
+    )
+  )
+}
+
+
+# Create function to apply across multiple imputation ---------------------------
+apply_across_MI <- function(cohort) {
+  splice(
+    comment(glue("apply_across_MI_cohort_{cohort}")),
+    action(
+      name = glue("apply_across_MI_cohort_{cohort}"),
+      run = glue(
+        "r:latest analysis/apply_across_MI/apply_across_MI.R"
       ),
       arguments = c(c(cohort)),
       needs = list(
         glue("generate_input_{cohort}_clean")
       ),
       highly_sensitive = list(
-        cohort_clean = glue("output/dataset_clean/input_{cohort}_clean.rds")
+        cohort_clean_ami   = glue("output/dataset_clean/input_{cohort}_clean_ami.rds"),
+        cohort_clean_sahhs = glue("output/dataset_clean/input_{cohort}_clean_sahhs.rds"),
+        nelsonaalen_ami    = glue("output/dataset_clean/nelson_aalen_{cohort}_ami.rds"),
+        nelsonaalen_sahhs  = glue("output/dataset_clean/nelson_aalen_{cohort}_sahhs.rds")
+      )
+    )
+  )
+}
+
+
+nelson_aalen_plots <- function(cohort) {
+  splice(
+    comment(glue("nelson_aalen_plots_cohort_{cohort}")),
+    action(
+      name = glue("nelson_aalen_plots_cohort_{cohort}"),
+      run = glue(
+        "r:latest analysis/nelson_aalen_plots/nelson_aalen_plots.R"
+      ),
+      arguments = c(c(cohort)),
+      needs = list(
+        glue("apply_across_MI_cohort_{cohort}")
+      ),
+      highly_sensitive = list(
+        nelsonaalen_plot_ami           = glue("output/dataset_clean/nelson_aalen_{cohort}_ami.png"),
+        nelsonaalen_plot_ami_ggplot    = glue("output/dataset_clean/nelson_aalen_{cohort}_ami_ggplot.png"),
+        nelsonaalen_plot_sahhs         = glue("output/dataset_clean/nelson_aalen_{cohort}_sahhs.png"),
+        nelsonaalen_plot_sahhs_ggplot  = glue("output/dataset_clean/nelson_aalen_{cohort}_sahhs_ggplot.png")
       )
     )
   )
@@ -216,10 +264,11 @@ generate_subsample_cohort <- function(cohort) {
       ),
       arguments = c(c(cohort)),
       needs = list(
-        glue("post_hoc_vars_cohort_{cohort}") # , glue("make_model_input-{name}")
+        glue("apply_across_MI_cohort_{cohort}") # , glue("make_model_input-{name}")
       ),
       highly_sensitive = list(
-        cohort_clean_subsample = glue("output/generate_subsample/input_{cohort}_clean_subsample.rds")
+        cohort_clean_subsample_ami   = glue("output/generate_subsample/input_{cohort}_clean_subsample_ami.rds"),
+        cohort_clean_subsample_sahhs = glue("output/generate_subsample/input_{cohort}_clean_subsample_sahhs.rds")
       )
     )
   )
@@ -274,13 +323,19 @@ table1 <- function(cohort, ages = "18;40;60;80", preex = "All") {
       name = glue("table1-cohort_{cohort}{preex_str}"),
       run = "r:v2 analysis/table1/table1.R",
       arguments = c(c(cohort), c(ages), c(preex)),
-      needs = list(glue("post_hoc_vars_cohort_{cohort}")),
+      needs = list(glue("apply_across_MI_cohort_{cohort}")),
       moderately_sensitive = list(
-        table1 = glue(
-          "output/table1/table1-cohort_{cohort}{preex_str}.csv"
+        table1_ami = glue(
+          "output/table1/table1-cohort_{cohort}{preex_str}_ami.csv"
         ),
-        table1_midpoint6 = glue(
-          "output/table1/table1-cohort_{cohort}{preex_str}-midpoint6.csv"
+        table1_ami_midpoint6 = glue(
+          "output/table1/table1-cohort_{cohort}{preex_str}_ami-midpoint6.csv"
+        ),
+        table1_sahhs = glue(
+          "output/table1/table1-cohort_{cohort}{preex_str}_sahhs.csv"
+        ),
+        table1_sahhs_midpoint6 = glue(
+          "output/table1/table1-cohort_{cohort}{preex_str}_sahhs-midpoint6.csv"
         )
       )
     )
@@ -302,13 +357,22 @@ table1_subsample <- function(cohort, ages = "18;40;60;80", preex = "All") {
       name = glue("table1-cohort_{cohort}{preex_str}_subsample"),
       run = "r:v2 analysis/table1/table1_subsample.R",
       arguments = c(c(cohort), c(ages), c(preex)),
-      needs = list(glue("generate_subsample_cohort_{cohort}")),
+      needs = list(
+        glue("apply_across_MI_cohort_{cohort}"),
+        glue("generate_subsample_cohort_{cohort}")
+      ),
       moderately_sensitive = list(
-        table1_subsample = glue(
-          "output/table1/table1-cohort_{cohort}{preex_str}_subsample.csv"
+        table1_ami_subsample = glue(
+          "output/table1/table1-cohort_{cohort}{preex_str}_ami_subsample.csv"
         ),
-        table1_midpoint6_subsample = glue(
-          "output/table1/table1-cohort_{cohort}{preex_str}-midpoint6_subsample.csv"
+        table1_ami_midpoint6_subsample = glue(
+          "output/table1/table1-cohort_{cohort}{preex_str}_ami-midpoint6_subsample.csv"
+        ),
+        table1_sahhs_subsample = glue(
+          "output/table1/table1-cohort_{cohort}{preex_str}_sahhs_subsample.csv"
+        ),
+        table1_sahhs_midpoint6_subsample = glue(
+          "output/table1/table1-cohort_{cohort}{preex_str}_sahhs-midpoint6_subsample.csv"
         )
       )
     )
@@ -501,7 +565,7 @@ apply_model_function <- function(
     action(
       name = glue("make_model_input-{name}"),
       run = glue("r:latest analysis/model/make_model_input.R {name}"),
-      needs = as.list(glue("post_hoc_vars_cohort_{cohort}")),
+      needs = as.list(glue("apply_across_MI_cohort_{cohort}")),
       highly_sensitive = list(
         model_input = glue("output/model/model_input-{name}.rds")
       )
@@ -509,7 +573,7 @@ apply_model_function <- function(
     action(
       name = glue("cox_ipw-{name}"),
       run = glue(
-        "cox-ipw:v0.0.39
+        "r:v2 analysis/cox_ipw/cox-ipw.R
         --df_input=model/model_input-{name}.rds
         --ipw={ipw}
         --exposure=exp_date
@@ -589,7 +653,7 @@ apply_lasso_cox_model_function <- function(
     action(
       name = glue("lasso_cox_ipw-{name}"),
       run = glue(
-        "cox-ipw:v0.0.39
+        "r:v2 analysis/cox_ipw/cox-ipw.R
         --df_input=model/model_input-{name}.rds
         --ipw={ipw}
         --exposure=exp_date
@@ -648,7 +712,7 @@ apply_lasso_X_cox_model_function <- function(
     action(
       name = glue("lasso_X_cox_ipw-{name}"),
       run = glue(
-        "cox-ipw:v0.0.39
+        "r:v2 analysis/cox_ipw/cox-ipw.R
         --df_input=model/model_input-{name}.rds
         --ipw={ipw}
         --exposure=exp_date
@@ -707,7 +771,7 @@ apply_lasso_union_cox_model_function <- function(
     action(
       name = glue("lasso_union_cox_ipw-{name}"),
       run = glue(
-        "cox-ipw:v0.0.39
+        "r:v2 analysis/cox_ipw/cox-ipw.R
         --df_input=model/model_input-{name}.rds
         --ipw={ipw}
         --exposure=exp_date
@@ -951,6 +1015,56 @@ make_lasso_union_model_output <- function(subgroup) {
 
 # Create funtion for making combined table/venn outputs ------------------------
 
+make_table1_output <- function(action_name, cohort, subgroup = "") {
+  cohort_names <- stringr::str_split(as.vector(cohort), ";")[[1]]
+  if (subgroup == "All" | subgroup == "") {
+    sub_str <- ""
+  } else {
+    if (grepl("preex", subgroup)) {
+      sub_str <- paste0("-", subgroup)
+    } else {
+      sub_str <- paste0("-sub_", subgroup)
+    }
+  }
+
+  splice(
+    comment(glue("Generate make-{action_name}{sub_str}-output")),
+    action(
+      name = glue("make-{action_name}{sub_str}-output"),
+      run = "r:v2 analysis/make_output/make_table1_output.R",
+      arguments = unlist(lapply(
+        list(
+          c(action_name, cohort, subgroup)
+        ),
+        function(x) {
+          x[x != ""]
+        }
+      )),
+      needs = c(
+        glue("apply_across_MI_cohort_prevax"),
+        as.list(
+          paste0(
+            action_name,
+            "-cohort_",
+            cohort_names,
+            sub_str
+          )
+        )
+      ),
+      moderately_sensitive = list(
+        other_output_ami_midpoint6 = glue(
+          "output/make_output/{action_name}{sub_str}_output_ami_midpoint6.csv"
+        ),
+        other_output_sahhs_midpoint6 = glue(
+          "output/make_output/{action_name}{sub_str}_output_sahhs_midpoint6.csv"
+        )
+      )
+    )
+  )
+}
+
+# Create funtion for making combined table/venn outputs ------------------------
+
 make_other_output <- function(action_name, cohort, subgroup = "") {
   cohort_names <- stringr::str_split(as.vector(cohort), ";")[[1]]
   if (subgroup == "All" | subgroup == "") {
@@ -1047,14 +1161,32 @@ actions_list <- splice(
     )
   ),
 
-  ## Define post hoc variables ----------------------------------
-
+  ## Make missingness table ----------------------------------------------------
+  
   splice(
     unlist(
-      lapply(cohorts, function(x) post_hoc_vars(cohort = x)),
+      lapply(cohorts, function(x) table_missingness(cohort = x)),
       recursive = FALSE
     )
   ),
+
+  ## Apply across multiple imputation ------------------------------------------
+  
+  splice(
+    unlist(
+      lapply(cohorts, function(x) apply_across_MI(cohort = x)),
+      recursive = FALSE
+    )
+  ),
+
+  ## Make Nelson-Aalen plots ---------------------------------------------------
+  
+  # splice(
+  #   unlist(
+  #     lapply(cohorts, function(x) nelson_aalen_plots(cohort = x)),
+  #     recursive = FALSE
+  #   )
+  # ),
 
   ## Generate 10% subsample study population ----------------------------------
 
@@ -1113,7 +1245,7 @@ actions_list <- splice(
   ),
 
   splice(
-    make_other_output(
+    make_table1_output(
       action_name = "table1",
       cohort = paste0(cohorts, collapse = ";"),
       subgroup = ""

@@ -84,12 +84,21 @@ if (grepl("ami", name)) {
 # Load data --------------------------------------------------------------------
 print("Load data")
 
-# subsample
-df <- readr::read_rds(paste0(
-  "output/generate_subsample/input_",
-  cohort,
-  "_clean_subsample.rds"
-))
+if (grepl("ami", name)) {
+  # subsample
+  df <- readr::read_rds(paste0(
+    "output/generate_subsample/input_",
+    cohort,
+    "_clean_subsample_ami.rds"
+  ))
+} else {
+  # subsample
+  df <- readr::read_rds(paste0(
+    "output/generate_subsample/input_",
+    cohort,
+    "_clean_subsample_sahhs.rds"
+  ))
+}
 
 # subsample
 model_input_df <- readr::read_rds(paste0(
@@ -113,6 +122,7 @@ logistic_df <- (df %>% select(c(
 
   cov_num_age,
   cov_cat_sex,
+  cov_num_bmi,
   cov_cat_ethnicity,
   cov_cat_imd,
   cov_cat_smoking,
@@ -144,6 +154,9 @@ logistic_df <- (df %>% select(c(
   cov_bin_hrt,
   strat_cat_region
 )))
+
+# prevent conversion to factor
+logistic_df$cov_num_bmi <- as.numeric(logistic_df$cov_num_bmi)
 
 
 # Data preparation for cox model ----------------------------------
@@ -159,6 +172,7 @@ cox_df <- (model_input_df %>% select(c(
 
   cov_num_age,
   cov_cat_sex,
+  cov_num_bmi,
   cov_cat_ethnicity,
   cov_cat_imd,
   cov_cat_smoking,
@@ -190,6 +204,9 @@ cox_df <- (model_input_df %>% select(c(
   cov_bin_hrt,
   strat_cat_region
 )))
+
+# prevent conversion to factor
+cox_df$cov_num_bmi <- as.numeric(cox_df$cov_num_bmi)
 
 cox_df$outcome_cox_dates <- rep(as.Date(NA), times = nrow(cox_df))
 cox_df$cens_status       <- rep(NA, times = nrow(cox_df))
@@ -234,11 +251,13 @@ fully_adjusted_outcome_regression_formula  <- make_outcome_formula(
 fully_adjusted_exposure_regression <- glm(
   fully_adjusted_exposure_regression_formula,
   family = "binomial",
-  data   = logistic_df
+  data   = logistic_df,
+  weights = generate_weights(sample_size = nrow(logistic_df))
 )
 fully_adjusted_outcome_regression  <- coxph(
   formula = as.formula(fully_adjusted_outcome_regression_formula),
-  data    = cox_df
+  data    = cox_df,
+  weights = generate_weights(sample_size = nrow(cox_df))
 )
 
 # extract regression results
@@ -325,11 +344,13 @@ lasso_outcome_regression_formula  <- make_outcome_formula(
 lasso_exposure_regression <- glm(
   lasso_exposure_regression_formula,
   family = "binomial",
-  data   = logistic_df
+  data   = logistic_df,
+  weights = generate_weights(sample_size = nrow(logistic_df))
 )
 lasso_outcome_regression  <- coxph(
   formula = as.formula(lasso_outcome_regression_formula),
-  data    = cox_df
+  data    = cox_df,
+  weights = generate_weights(sample_size = nrow(cox_df))
 )
 
 # extract regression results
@@ -416,11 +437,13 @@ lasso_X_outcome_regression_formula  <- make_outcome_formula(
 lasso_X_exposure_regression <- glm(
   lasso_X_exposure_regression_formula,
   family = "binomial",
-  data   = logistic_df
+  data   = logistic_df,
+  weights = generate_weights(sample_size = nrow(logistic_df))
 )
 lasso_X_outcome_regression  <- coxph(
   formula = as.formula(lasso_X_outcome_regression_formula),
-  data    = cox_df
+  data    = cox_df,
+  weights = generate_weights(sample_size = nrow(cox_df))
 )
 
 # extract regression results
@@ -507,11 +530,13 @@ lasso_union_outcome_regression_formula  <- make_outcome_formula(
 lasso_union_exposure_regression <- glm(
   lasso_union_exposure_regression_formula,
   family = "binomial",
-  data   = logistic_df
+  data   = logistic_df,
+  weights = generate_weights(sample_size = nrow(logistic_df))
 )
 lasso_union_outcome_regression  <- coxph(
   formula = as.formula(lasso_union_outcome_regression_formula),
-  data    = cox_df
+  data    = cox_df,
+  weights = generate_weights(sample_size = nrow(cox_df))
 )
 
 # extract regression results
