@@ -254,21 +254,21 @@ nelson_aalen_plots <- function(cohort) {
 
 
 # Create function to generate 10% subsample of study population -----------------
-generate_subsample_cohort <- function(cohort) {
+post_hoc_vars_cohort <- function(cohort) {
   splice(
-    comment(glue("generate_subsample_cohort_{cohort}")),
+    comment(glue("post_hoc_vars_cohort_{cohort}")),
     action(
-      name = glue("generate_subsample_cohort_{cohort}"),
+      name = glue("post_hoc_vars_cohort_{cohort}"),
       run = glue(
-        "r:latest analysis/generate_subsample/generate_subsample.R"
+        "r:latest analysis/post_hoc_vars/post_hoc_vars.R"
       ),
       arguments = c(c(cohort)),
       needs = list(
         glue("apply_across_MI_cohort_{cohort}") # , glue("make_model_input-{name}")
       ),
       highly_sensitive = list(
-        cohort_clean_subsample_ami   = glue("output/generate_subsample/input_{cohort}_clean_subsample_ami.rds"),
-        cohort_clean_subsample_sahhs = glue("output/generate_subsample/input_{cohort}_clean_subsample_sahhs.rds")
+        cohort_clean_subsample_ami   = glue("output/post_hoc_vars/input_{cohort}_clean_subsample_ami.rds"),
+        cohort_clean_subsample_sahhs = glue("output/post_hoc_vars/input_{cohort}_clean_subsample_sahhs.rds")
       )
     )
   )
@@ -300,7 +300,7 @@ make_model_input_subsample <- function(
     action(
       name = glue("make_model_input_subsample-{name}"),
       run = glue("r:latest analysis/model/make_model_input_subsample.R {name}"),
-      needs = as.list(glue("generate_subsample_cohort_{cohort}")),
+      needs = as.list(glue("post_hoc_vars_cohort_{cohort}")),
       highly_sensitive = list(
         model_input = glue("output/model/model_input_subsample-{name}.rds")
       )
@@ -359,7 +359,7 @@ table1_subsample <- function(cohort, ages = "18;40;60;80", preex = "All") {
       arguments = c(c(cohort), c(ages), c(preex)),
       needs = list(
         glue("apply_across_MI_cohort_{cohort}"),
-        glue("generate_subsample_cohort_{cohort}")
+        glue("post_hoc_vars_cohort_{cohort}")
       ),
       moderately_sensitive = list(
         table1_ami_subsample = glue(
@@ -394,7 +394,7 @@ lasso_var_selection <- function(name, cohort, ages = "18;40;60;80", preex = "All
       name = glue("lasso_var_selection-{name}{preex_str}"),
       run = "r:v2 analysis/lasso_var_selection/lasso_var_selection.R",
       arguments = c(c(name), c(cohort), c(ages), c(preex)),
-      needs = list(glue("generate_subsample_cohort_{cohort}"),
+      needs = list(glue("post_hoc_vars_cohort_{cohort}"),
                    glue("make_model_input_subsample-{name}")),
       moderately_sensitive = list(
         fully_adjusted_cox_coefs = glue(
@@ -426,7 +426,7 @@ lasso_X_var_selection <- function(name, cohort, ages = "18;40;60;80", preex = "A
       name = glue("lasso_X_var_selection-{name}{preex_str}"),
       run = "r:v2 analysis/lasso_X_var_selection/lasso_X_var_selection.R",
       arguments = c(c(name), c(cohort), c(ages), c(preex)),
-      needs = list(glue("generate_subsample_cohort_{cohort}"),
+      needs = list(glue("post_hoc_vars_cohort_{cohort}"),
                    glue("lasso_var_selection-{name}{preex_str}")),
       moderately_sensitive = list(
         fully_adjusted_logistic_coefs = glue(
@@ -821,7 +821,7 @@ unconfoundedness_test <- function(name, cohort, ages = "18;40;60;80", preex = "A
       needs = list(glue("lasso_var_selection-{name}{preex_str}"),
                    glue("lasso_X_var_selection-{name}{preex_str}"),
                    glue("lasso_union_var_selection-{name}{preex_str}"),
-                   glue("generate_subsample_cohort_{cohort}"),
+                   glue("post_hoc_vars_cohort_{cohort}"),
                    glue("make_model_input_subsample-{name}")),
       moderately_sensitive = list(
         all_var_sets_conclusion_table              = glue("output/unconfoundedness_test/all_var_sets_conclusion_table-{name}{preex_str}.csv"),
@@ -1192,7 +1192,7 @@ actions_list <- splice(
 
   splice(
     unlist(
-      lapply(cohorts, function(x) generate_subsample_cohort(cohort = x)),
+      lapply(cohorts, function(x) post_hoc_vars_cohort(cohort = x)),
       recursive = FALSE
     )
   ),

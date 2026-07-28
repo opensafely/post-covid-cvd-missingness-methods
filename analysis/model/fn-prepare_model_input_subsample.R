@@ -19,14 +19,14 @@ prepare_model_input_subsample <- function(name) {
   if (grepl("ami", name)) {
     # subsample
     input <- readr::read_rds(paste0(
-      "output/generate_subsample/input_",
+      "output/post_hoc_vars/input_",
       active_analyses$cohort,
       "_clean_subsample_ami.rds"
     ))
   } else {
     # subsample
     input <- readr::read_rds(paste0(
-      "output/generate_subsample/input_",
+      "output/post_hoc_vars/input_",
       active_analyses$cohort,
       "_clean_subsample_sahhs.rds"
     ))
