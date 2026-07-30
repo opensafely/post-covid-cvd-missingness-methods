@@ -87,14 +87,14 @@ print("Load data")
 if (grepl("ami", name)) {
   # subsample
   df <- readr::read_rds(paste0(
-    "output/generate_subsample/input_",
+    "output/post_hoc_vars/input_",
     cohort,
     "_clean_subsample_ami.rds"
   ))
 } else {
   # subsample
   df <- readr::read_rds(paste0(
-    "output/generate_subsample/input_",
+    "output/post_hoc_vars/input_",
     cohort,
     "_clean_subsample_sahhs.rds"
   ))

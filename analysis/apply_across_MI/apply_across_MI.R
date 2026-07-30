@@ -89,6 +89,16 @@ df <- readr::read_rds(paste0(
 df <- as.data.frame(df)
 
 
+# Generate 10% subsample ------------------------------------------------------
+print("Generate 10% subsample")
+
+set.seed(2026) # fixed for reproducibility, no overlapping RNG sequences so fine to handle in this way
+
+sample_size  <- nrow(df)
+selection    <- sample(x = c(1:sample_size), size = ceiling(sample_size/10), replace = FALSE)
+df           <- df[selection, ]
+
+
 # Define variables -------------------------------------------------------------
 print("Define variables")
 
@@ -371,6 +381,9 @@ nelsonaalen_with_SE <- function(data, timevar, statusvar, ...) {
   return (nelsonaalen_estimates_with_SE)
 }
 
+# Determine RHC outcome dates for ami --------------------------
+print("Determine RHC outcome dates for ami")
+
 df_ami   <- df
 df_sahhs <- df
 
@@ -393,6 +406,9 @@ for (i in c(1:nrow(df_ami))) {
   }
 }
 
+# Determine RHC outcome dates for sahhs --------------------------
+print("Determine RHC outcome dates for sahhs")
+
 outcome_cox_dates_sahhs <- rep(as.Date(NA), times = nrow(df_sahhs))
 cens_status_sahhs       <- rep(NA, times = nrow(df_sahhs))
 
@@ -412,12 +428,19 @@ for (i in c(1:nrow(df_sahhs))) {
   }
 }
 
-# add data to dataframes
+
+# Add censorship dates to dataframe for both outcomes
+print("Add censorship dates to dataframe for both outcomes")
+
 df_ami$outcome_cox_dates_ami <- as.numeric(outcome_cox_dates_ami)
 df_ami$cens_status_ami       <- cens_status_ami
 
 df_sahhs$outcome_cox_dates_sahhs <- as.numeric(outcome_cox_dates_sahhs)
 df_sahhs$cens_status_sahhs       <- cens_status_sahhs
+
+
+# Calculate Nelson Aalen for ami
+print("Calculate Nelson Aalen for ami")
 
 # ami
 df_ami_nelsonaalen    <- data.frame(time = df_ami$outcome_cox_dates_ami, status = df_ami$cens_status_ami)
@@ -425,6 +448,9 @@ H0_ami                <- nelsonaalen_with_SE(df_ami_nelsonaalen, time, status)
 df_ami_nelsonaalen$H0 <- H0_ami$nelsonaalen_estimates
 df_ami_nelsonaalen$se <- H0_ami$nelsonaalen_se
 df_ami$H0             <- H0_ami$nelsonaalen_estimates
+
+# Calculate Nelson Aalen for sahhs
+print("Calculate Nelson Aalen for sahhs")
 
 # sahhs
 df_sahhs_nelsonaalen    <- data.frame(time = df_sahhs$outcome_cox_dates_sahhs, status = df_sahhs$cens_status_sahhs)
@@ -434,8 +460,8 @@ df_sahhs_nelsonaalen$se <- H0_sahhs$nelsonaalen_se
 df_sahhs$H0             <- H0_sahhs$nelsonaalen_estimates
 
 
-# Applying multiple imputation to BMI and smoking covariates for outcome ---
-print("Applying multiple imputation to BMI and smoking covariates for outcome")
+# Applying multiple imputation to BMI and smoking covariates for ami ---
+print("Applying multiple imputation to BMI and smoking covariates for ami")
 
 # Apply multiple imputation for ami outcome
 imp_ami <- mice::mice(
@@ -456,6 +482,11 @@ df_post_imputation_ami <- subset(
   df_post_imputation_ami,
   select = -c(.imp, .id)
 )
+
+
+
+# Applying multiple imputation to BMI and smoking covariates for sahhs ---
+print("Applying multiple imputation to BMI and smoking covariates for sahhs")
 
 # Apply multiple imputation for sahhs outcome
 imp_sahhs <- mice::mice(

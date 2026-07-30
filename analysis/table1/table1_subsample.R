@@ -83,14 +83,14 @@ print("Load data")
 
 # subsample, ami
 df_ami <- readr::read_rds(paste0(
-  "output/generate_subsample/input_",
+  "output/post_hoc_vars/input_",
   cohort,
   "_clean_subsample_ami.rds"
 ))
 
 # subsample, sahhs
 df_sahhs <- readr::read_rds(paste0(
-  "output/generate_subsample/input_",
+  "output/post_hoc_vars/input_",
   cohort,
   "_clean_subsample_sahhs.rds"
 ))
