@@ -202,22 +202,40 @@ lasso_X_exposure_matrix_preserving_factors <- model.matrix(
 # Fitting the lasso_X logistic model ------------------------------------------
 message("Fitting the lasso_X logistic model")
 
-cv_lasso_X_model <- cv.glmnet(x      = lasso_X_conf_matrix_preserving_factors,
-                              y      = lasso_X_exposure_matrix_preserving_factors,
-                              nfolds = 20,         # number of cv datasets
-                              family = "binomial", # logistic regression
-                              weights = generate_weights(sample_size = nrow(df)),
-                              alpha  = 1)          # LASSO penalty
+cv_lasso_X_logistic_model <- cv.glmnet(x      = lasso_X_conf_matrix_preserving_factors,
+                                       y      = lasso_X_exposure_matrix_preserving_factors,
+                                       nlambda = 200,       # length of lambda sequence
+                                       nfolds  = 10,         # number of cv datasets
+                                       family = "binomial", # logistic regression
+                                       weights = generate_weights(sample_size = nrow(df)),
+                                       alpha  = 1)          # LASSO penalty
+
+
+# Selecting optimal regularization parameter (lambda) ---------
+message("Selecting optimal regularization parameter (lambda)")
 
 # tune regularisation parameter lambda to minimise cross-validated error (cvm)
-lambda         <- cv_lasso_X_model$lambda.min
+lambda     <- cv_lasso_X_logistic_model$lambda.min
+lambda_1se <- cv_lasso_X_logistic_model$lambda.1se
+print(paste0("Optimal lambda:", lambda))
 
-lasso_X_model    <- glmnet(x      = lasso_X_conf_matrix_preserving_factors,
-                           y      = lasso_X_exposure_matrix_preserving_factors,
-                           family = "binomial", # logistic regression
-                           weights = generate_weights(sample_size = nrow(df)),
-                           alpha  = 1,          # LASSO penalty
-                           lambda = lambda)     # optimal lambda
+lambda_sequence <- data.frame(
+  lambda     = cv_lasso_X_logistic_model$lambda,
+  cvm        = cv_lasso_X_logistic_model$cvm,
+  cvm_se     = cv_lasso_X_logistic_model$cvsd,
+  cvm_upper  = cv_lasso_X_logistic_model$cvup,
+  cvm_lower  = cv_lasso_X_logistic_model$cvlo,
+  lambda_min = cv_lasso_X_logistic_model$lambda.min, # constant column
+  lambda_1se = cv_lasso_X_logistic_model$lambda.1se  # constant column
+)
+
+
+# Extracting the lasso_X cox model coefficients ---------------------------
+message("Extracting the lasso_X cox model coefficients")
+
+lasso_X_logistic_coefs           <- coef(cv_lasso_X_logistic_model, s = lambda)
+lasso_X_logistic_coefs           <- as.data.frame(as.matrix(lasso_X_logistic_coefs))
+colnames(lasso_X_logistic_coefs) <- c("coefficient")
 
 
 # Fitting the Fully adjusted logistic model ------------------------------------
@@ -233,15 +251,11 @@ fully_adjusted_logistic <- glm(
 )
 
 
-
 # Extract covariate selection results ------------------------------------------
 print("Extract covariate selection results")
 
-lasso_X_coefs        <- as.vector(lasso_X_model$beta)
-names(lasso_X_coefs) <- rownames(lasso_X_model$beta)
-
-candidate_vars <- colnames(lasso_X_conf_matrix)
-non_zero_vars  <- names(lasso_X_coefs[lasso_X_coefs != 0.0])
+non_zero_coefs <- lasso_X_logistic_coefs %>% dplyr::filter(coefficient != 0.0)
+non_zero_vars  <- rownames(non_zero_coefs)
 vars_selected  <- convert_terms_to_vars(non_zero_vars)
 
 # always include exposure
@@ -260,7 +274,7 @@ write.csv(
 )
 
 write.csv(
-  lasso_X_coefs,
+  lasso_X_logistic_coefs,
   paste0(lasso_X_var_selection_dir, "lasso_X_var_selection-coefs-", name, preex_string, ".csv"),
   row.names = TRUE
 )
@@ -268,5 +282,11 @@ write.csv(
 write.csv(
   vars_selected,
   paste0(lasso_X_var_selection_dir, "lasso_X_var_selection-", name, preex_string, ".csv"),
+  row.names = FALSE
+)
+
+write.csv(
+  lambda_sequence,
+  paste0(lasso_X_var_selection_dir, "lambda_sequence-", name, preex_string, ".csv"),
   row.names = FALSE
 )
