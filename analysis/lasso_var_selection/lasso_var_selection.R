@@ -248,9 +248,6 @@ cv_lasso_cox_model <- cv.glmnet(x       = lasso_cox_conf_matrix_preserving_facto
                                 weights = generate_weights(sample_size = nrow(model_input_df)),
                                 alpha   = 1)          # LASSO penalty
 
-# tune regularisation parameter lambda to minimise cross-validated error (cvm)
-lambda         <- cv_lasso_cox_model$lambda.min
-
 # Selecting optimal regularization parameter (lambda) ---------
 message("Selecting optimal regularization parameter (lambda)")
 
