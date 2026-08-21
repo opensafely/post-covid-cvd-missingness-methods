@@ -136,7 +136,7 @@ clean_data <- function(cohort, describe = describe) {
       # Action to include describe*.txt files
       action(
         name = glue("generate_input_{cohort}_clean"),
-        run = glue("r:latest analysis/dataset_clean/dataset_clean.R"),
+        run = glue("r:v2 analysis/dataset_clean/dataset_clean.R"),
         arguments = c(c(cohort), c(describe)),
         needs = list(
           "study_dates",
@@ -162,7 +162,7 @@ clean_data <- function(cohort, describe = describe) {
       # Action to exclude describe*.txt files
       action(
         name = glue("generate_input_{cohort}_clean"),
-        run = glue("r:latest analysis/dataset_clean/dataset_clean.R"),
+        run = glue("r:v2 analysis/dataset_clean/dataset_clean.R"),
         arguments = c(c(cohort), c(describe)),
         needs = list(
           "study_dates",
@@ -191,7 +191,7 @@ table_missingness <- function(cohort) {
     action(
       name = glue("table_missingness_cohort_{cohort}"),
       run = glue(
-        "r:latest analysis/table_missingness/table_missingness.R"
+        "r:v2 analysis/table_missingness/table_missingness.R"
       ),
       arguments = c(c(cohort)),
       needs = list(
@@ -213,7 +213,7 @@ apply_across_MI <- function(cohort) {
     action(
       name = glue("apply_across_MI_cohort_{cohort}"),
       run = glue(
-        "r:latest analysis/apply_across_MI/apply_across_MI.R"
+        "r:v2 analysis/apply_across_MI/apply_across_MI.R"
       ),
       arguments = c(c(cohort)),
       needs = list(
@@ -236,7 +236,7 @@ nelson_aalen_plots <- function(cohort) {
     action(
       name = glue("nelson_aalen_plots_cohort_{cohort}"),
       run = glue(
-        "r:latest analysis/nelson_aalen_plots/nelson_aalen_plots.R"
+        "r:v2 analysis/nelson_aalen_plots/nelson_aalen_plots.R"
       ),
       arguments = c(c(cohort)),
       needs = list(
@@ -260,7 +260,7 @@ post_hoc_vars_cohort <- function(cohort) {
     action(
       name = glue("post_hoc_vars_cohort_{cohort}"),
       run = glue(
-        "r:latest analysis/post_hoc_vars/post_hoc_vars.R"
+        "r:v2 analysis/post_hoc_vars/post_hoc_vars.R"
       ),
       arguments = c(c(cohort)),
       needs = list(
@@ -299,7 +299,7 @@ make_model_input_subsample <- function(
     comment(glue("make_model_input_subsample-{name}")),
     action(
       name = glue("make_model_input_subsample-{name}"),
-      run = glue("r:latest analysis/model/make_model_input_subsample.R {name}"),
+      run = glue("r:v2 analysis/model/make_model_input_subsample.R {name}"),
       needs = as.list(glue("post_hoc_vars_cohort_{cohort}")),
       highly_sensitive = list(
         model_input = glue("output/model/model_input_subsample-{name}.rds")
@@ -570,7 +570,7 @@ apply_model_function <- function(
   splice(
     action(
       name = glue("make_model_input-{name}"),
-      run = glue("r:latest analysis/model/make_model_input.R {name}"),
+      run = glue("r:v2 analysis/model/make_model_input.R {name}"),
       needs = as.list(glue("apply_across_MI_cohort_{cohort}")),
       highly_sensitive = list(
         model_input = glue("output/model/model_input-{name}.rds")
@@ -1155,7 +1155,7 @@ actions_list <- splice(
 
   action(
     name = glue("study_dates"),
-    run = "r:latest analysis/study_dates.R",
+    run = "r:v2 analysis/study_dates.R",
     highly_sensitive = list(
       study_dates_json = glue("output/study_dates.json")
     )
