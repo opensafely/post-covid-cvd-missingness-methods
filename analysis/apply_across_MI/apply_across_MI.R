@@ -89,13 +89,13 @@ df <- readr::read_rds(paste0(
 df <- as.data.frame(df)
 
 
-# Generate 10% subsample ------------------------------------------------------
-print("Generate 10% subsample")
+# Generate 5% subsample ------------------------------------------------------
+print("Generate 5% subsample")
 
 set.seed(2026) # fixed for reproducibility, no overlapping RNG sequences so fine to handle in this way
 
 sample_size  <- nrow(df)
-selection    <- sample(x = c(1:sample_size), size = ceiling(sample_size/10), replace = FALSE)
+selection    <- sample(x = c(1:sample_size), size = ceiling(sample_size/20), replace = FALSE)
 df           <- df[selection, ]
 
 
